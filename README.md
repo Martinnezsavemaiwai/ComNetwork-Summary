@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://img.icons8.com/external-flat-juicy-fish/64/network.png" alt="network-icon" width="80"/>
+  <img src="https://blog.greencloudvps.com/wp-content/uploads/2022/04/computer-networking.png" alt="network-icon" width="80"/>
 </p>
 
 <h1 align="center">🌐 ComNetwork-Summary</h1>
