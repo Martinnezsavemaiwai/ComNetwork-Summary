@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สรุปเนื้อหา Internet Protocol version 6 (IPv6)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Sarabun', sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 210mm;
+            margin: 0 auto;
+            background: #ffffff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255,255,255,0.05) 10px,
+                rgba(255,255,255,0.05) 20px
+            );
+            animation: move 20s linear infinite;
+        }
+        
+        @keyframes move {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 5px solid #3498db;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .section:hover {
+            transform: translateY(-5px);
+        }
+        
+        .section h2 {
+            color: #2c3e50;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section h3 {
+            color: #34495e;
+            font-size: 1.4em;
+            margin: 20px 0 15px 0;
+            font-weight: 500;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 5px;
+        }
+        
+        .section h4 {
+            color: #2980b9;
+            font-size: 1.2em;
+            margin: 15px 0 10px 0;
+            font-weight: 500;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .comparison-table th {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .comparison-table tr:hover {
+            background: #e3f2fd;
+        }
+        
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            overflow-x: auto;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .highlight {
+            background: linear-gradient(120deg, #f39c12, #e67e22);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+            border: 1px solid #4caf50;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            position: relative;
+        }
+        
+        .info-box::before {
+            content: "💡";
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 1.5em;
+        }
+        
+        .info-box .content {
+            margin-left: 40px;
+            padding: 0;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            border: 1px solid #ff9800;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            position: relative;
+        }
+        
+        .warning-box::before {
+            content: "⚠️";
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 1.5em;
+        }
+        
+        .warning-box .content {
+            margin-left: 40px;
+            padding: 0;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #3498db;
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-card h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        li {
+            margin: 8px 0;
+        }
+        
+        .download-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+                max-width: none;
+            }
+            
+            .download-btn {
+                display: none;
+            }
+            
+            .section {
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="download-btn" onclick="downloadPDF()">📥 ดาวน์โหลด PDF</button>
+    
+    <div class="container">
+        <div class="header">
+            <h1>Internet Protocol version 6 (IPv6)</h1>
+            <p>สรุปเนื้อหาแบบละเอียดและครบถ้วน</p>
+        </div>
+        
+        <div class="content">
+            <!-- ภาพรวมและแรงจูงใจ -->
+            <div class="section">
+                <h2>🎯 ภาพรวมและแรงจูงใจ</h2>
+                
+                <h3>แรงจูงใจหลัก</h3>
+                <div class="info-box">
+                    <div class="content">
+                        <strong>ปัญหา IPv4 Address หมด:</strong> เหตุผลหลักในการพัฒนา IPv6 คือ IPv4 addresses ที่มีอยู่ไม่เพียงพอต่อการเติบโตของอินเทอร์เน็ต
+                    </div>
+                </div>
+                
+                <h3>แรงจูงใจเพิ่มเติม</h3>
+                <ul>
+                    <li><strong>ประสิทธิภาพการประมวลผล:</strong> รูปแบบ header ใหม่ช่วยเพิ่มความเร็วในการประมวลผลและการส่งต่อข้อมูล</li>
+                    <li><strong>Quality of Service (QoS):</strong> การเปลี่ยนแปลง header เพื่อรองรับ QoS ได้ดีขึ้น</li>
+                </ul>
+                
+                <h3>คุณสมบัติหลัก IPv6</h3>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>128-bit Address</h4>
+                        <p>ขนาดของ address ใหญ่กว่า IPv4 มาก ทำให้มี address space เพียงพอสำหรับอนาคต</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Fixed Header Length</h4>
+                        <p>Header มีขนาดคงที่ 40 bytes ทำให้ประมวลผลได้เร็วขึ้น</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- การเปลี่ยนแปลงจาก IPv4 -->
+            <div class="section">
+                <h2>🔄 การเปลี่ยนแปลงสำคัญจาก IPv4</h2>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>คุณสมบัติ</th>
+                            <th>IPv4</th>
+                            <th>IPv6</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Checksum</strong></td>
+                            <td>มีการตรวจสอบใน IP header</td>
+                            <td>ถูกเอาออกทั้งหมดเพื่อลดเวลาประมวลผล</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Options</strong></td>
+                            <td>อยู่ใน header</td>
+                            <td>ย้ายออกมาเป็น Extension Headers</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Address Resolution</strong></td>
+                            <td>ใช้ ARP Protocol</td>
+                            <td>ใช้ Neighbor Discovery Protocol (NDP)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ICMP</strong></td>
+                            <td>ICMPv4</td>
+                            <td>ICMPv6 พร้อม message types ใหม่</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fragmentation</strong></td>
+                            <td>Router สามารถ fragment ได้</td>
+                            <td>ไม่อนุญาตให้ fragment โดย router</td>
+                        </tr>
+                        <tr>
+                            <td><strong>OSPF</strong></td>
+                            <td>OSPF Version 2</td>
+                            <td>OSPF Version 3</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- ประเภทของ Address -->
+            <div class="section">
+                <h2>🏠 ประเภทของ IPv6 Address</h2>
+                
+                <h3>Global (Public, Unicast)</h3>
+                <div class="code-block">
+IPv4: 203.11.22.33
+IPv6: 2xxx:... - 3xxx:...
+                </div>
+                
+                <h3>Broadcast</h3>
+                <div class="warning-box">
+                    <div class="content">
+                        <strong>สำคัญ:</strong> IPv6 ไม่มี broadcast address แทนที่ด้วย multicast
+                    </div>
+                </div>
+                
+                <h3>Multicast (To a group)</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>ประเภท</th>
+                            <th>IPv4</th>
+                            <th>IPv6</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>All devices</td>
+                            <td>224.0.0.1</td>
+                            <td>ff02::1</td>
+                        </tr>
+                        <tr>
+                            <td>All routers</td>
+                            <td>224.0.0.2</td>
+                            <td>ff02::2</td>
+                        </tr>
+                        <tr>
+                            <td>All OSPFv3 routers</td>
+                            <td>224.0.0.5</td>
+                            <td>ff02::5</td>
+                        </tr>
+                        <tr>
+                            <td>All EIGRP routers</td>
+                            <td>224.0.0.10</td>
+                            <td>ff02::a</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3>Anycast (One-to-one-of-many)</h3>
+                <p>ประเภทใหม่ใน IPv6 ที่ส่งข้อมูลไปยัง node ที่ใกล้ที่สุดในกลุ่ม</p>
+                
+                <h3>ประเภท Address อื่นๆ</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>ประเภท</th>
+                            <th>IPv4</th>
+                            <th>IPv6</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Link-Local</strong></td>
+                            <td>169.254.x.x</td>
+                            <td>FE8x: - FEBx:</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Private</strong></td>
+                            <td>192.168.x.x, 10.x.x.x, 172.16-31.x.x</td>
+                            <td>FC00:, FD00: (Unique Local Address)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Loopback</strong></td>
+                            <td>127.0.0.1</td>
+                            <td>::1</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- การเขียน IPv6 Address -->
+            <div class="section">
+                <h2>✍️ การเขียนและอ่าน IPv6 Address</h2>
+                
+                <h3>รูปแบบพื้นฐาน</h3>
+                <p>IPv6 address ประกอบด้วย <span class="highlight">8 กลุ่มของเลขฐาน 16 ขนาด 16-bit</span> คั่นด้วยเครื่องหมาย colon (:)</p>
+                
+                <h3>กฎการย่อ Address</h3>
+                <div class="info-box">
+                    <div class="content">
+                        <strong>Rule 1:</strong> เอาเลข 0 นำหน้าออก (0000 จะเหลือ 0 เดียว)<br>
+                        <strong>Rule 2:</strong> แทนที่กลุ่มของเลข 0 ติดต่อกันด้วย :: (ใช้ได้ครั้งเดียวต่อ address)
+                    </div>
+                </div>
+                
+                <h3>ตัวอย่างการย่อ Address</h3>
+                <div class="code-block">
+Original: 2001:0000:0000:34fe:0000:0000:00ff:0321
+
+Step 1 (Remove leading zeros): 2001:0:0:34fe:0:0:ff:321
+
+Step 2 (Use double colon): 
+- 2001::34fe:0:0:ff:321
+- หรือ 2001:0:0:34fe::ff:321
+                </div>
+                
+                <h3>ตัวอย่างพิเศษ</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>ประเภท</th>
+                            <th>รูปแบบเต็ม</th>
+                            <th>รูปแบบย่อ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Loopback</strong></td>
+                            <td>0000:0000:0000:0000:0000:0000:0000:0001</td>
+                            <td>::1</td>
+                        </tr>
+                        <tr>
+                            <td><strong>All zeros</strong></td>
+                            <td>0000:0000:0000:0000:0000:0000:0000:0000</td>
+                            <td>::</td>
+                        </tr>
+                        <tr>
+                            <td><strong>IPv4-mapped</strong></td>
+                            <td>0000:0000:0000:0000:0000:ffff:192.168.1.1</td>
+                            <td>::ffff:192.168.1.1</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Address ที่จำเป็นสำหรับ Node -->
+            <div class="section">
+                <h2>🔧 Address ที่จำเป็นสำหรับทุก IPv6 Node</h2>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>Link-local address</h4>
+                        <p><strong>FE80::/10</strong><br>สำหรับแต่ละ network interface</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Global unicast address</h4>
+                        <p><strong>2000::/3</strong><br>Address สำหรับการสื่อสารทั่วไป</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Loopback address</h4>
+                        <p><strong>::1</strong><br>เทียบเท่า 127.0.0.1 ใน IPv4</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>All-node multicast</h4>
+                        <p><strong>FF01::1, FF02::1</strong><br>สำหรับ multicast ไปยัง node ทั้งหมด</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prefix และ Subnetting -->
+            <div class="section">
+                <h2>🌐 Prefix และ Subnetting</h2>
+                
+                <h3>แนวคิด Prefix</h3>
+                <div class="info-box">
+                    <div class="content">
+                        Prefix ใน IPv6 ทำหน้าที่เหมือน netmask ใน IPv4 แต่แสดงเป็นจำนวน bits ที่ใช้สำหรับ network address
+                    </div>
+                </div>
+                
+                <div class="code-block">
+ตัวอย่าง: 2001:DB80:1111:0001:0000:0000:c71b:87a7/48
+
+Network address (48 bits): 2001:DB80:1111::
+Host address (80 bits): 0001:0000:0000:c71b:87a7
+Network notation: 2001:DB80:1111::/48
+                </div>
+                
+                <h3>การแบ่ง Prefix</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>ส่วนประกอb</th>
+                            <th>จำนวน bits</th>
+                            <th>หน้าที่</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Site Prefix</strong></td>
+                            <td>48 bits</td>
+                            <td>ได้รับจาก ISP</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Subnet Number</strong></td>
+                            <td>16 bits</td>
+                            <td>สำหรับแบ่ง subnet ภายในองค์กร</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Host Number</strong></td>
+                            <td>64 bits</td>
+                            <td>สำหรับ host ใน subnet</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="warning-box">
+                    <div class="content">
+                        <strong>ข้อสำคัญ:</strong> IPv6 ไม่มีแนวคิดของ broadcast หรือ network address เหมือน IPv4 ทุก address สามารถใช้งานได้หมด
+                    </div>
+                </div>
+            </div>
+
+            <!-- การกำหนด Host Address -->
+            <div class="section">
+                <h2>🏷️ การกำหนด Host Address Configuration</h2>
+                
+                <h3>วิธีการกำหนด 64-bit Host Address</h3>
+                <ul>
+                    <li><strong>Modified EUI-64:</strong> ใช้ MAC address เป็นฐาน</li>
+                    <li><strong>Random:</strong> สุ่มขึ้นมา (default ใน Windows 7)</li>
+                    <li><strong>Cryptographically Generated Address (CGA):</strong> ใช้ใน SEND</li>
+                    <li><strong>DHCP assignment:</strong> กำหนดโดย DHCP server</li>
+                </ul>
+                
+                <h3>Modified EUI-64 Process</h3>
+                <div class="code-block">
+ขั้นตอนการสร้าง Modified EUI-64:
+
+1. แบ่ง MAC address 48-bit เป็น 2 ส่วน
+   MAC: 00:03:ba:24:a9:C6
+   ส่วนที่ 1: 00:03:ba
+   ส่วนที่ 2: 24:a9:C6
+
+2. แทรก "FFFE" ระหว่าง 2 ส่วน
+   Result: 00:03:ba:FF:FE:24:a9:C6
+
+3. Invert bit ที่ 7 ของ byte แรก
+   00000000 → 00000010 (00 → 02)
+   Final: 02:03:ba:FF:FE:24:a9:C6
+
+4. เขียนในรูปแบบ IPv6
+   Result: 0203:BAFF:FE24:A9C6
+                </div>
+            </div>
+
+            <!-- IPv6 Header Structure -->
+            <div class="section">
+                <h2>📋 โครงสร้าง IPv6 Header</h2>
+                
+                <h3>ส่วนประกอบของ IPv6 Header</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>ขนาด (bits)</th>
+                            <th>หน้าที่</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Version</strong></td>
+                            <td>4</td>
+                            <td>เวอร์ชันของ IP (6)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Traffic Class</strong></td>
+                            <td>8</td>
+                            <td>ระบุ priority และ QoS</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Flow Label</strong></td>
+                            <td>20</td>
+                            <td>ระบุ flow เดียวกัน</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Payload Length</strong></td>
+                            <td>16</td>
+                            <td>ขนาดของ payload</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Next Header</strong></td>
+                            <td>8</td>
+                            <td>ระบุ protocol ถัดไป</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hop Limit</strong></td>
+                            <td>8</td>
+                            <td>เทียบเท่า TTL ใน IPv4</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Source Address</strong></td>
+                            <td>128</td>
+                            <td>Address ต้นทาง</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Destination Address</strong></td>
+                            <td>128</td>
+                            <td>Address ปลายทาง</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Extension Headers -->
+            <div class="section">
+                <h2>🔗 IPv6 Extension Headers</h2>
+                
+                <h3>ความแตกต่างจาก IPv4</h3>
+                <div class="info-box">
+                    <div class="content">
+                        IPv6 ใช้ Extension Headers แทน Options ใน IPv4 header ทำให้ประมวลผลได้เร็วขึ้นและยืดหยุ่นมากขึ้น
+                    </div>
+                </div>
+                
+                <h3>Extension Headers ที่สำคัญ</h3>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>Hop-by-Hop Extension Header</h4>
+                        <p>เป็น EH เดียวที่ router ทุกตัวต้องประมวลผล และต้องอยู่ในลำดับแรกเสมอ</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Fragmentation EH</h4>
+                        <p>สำคัญสำหรับการสื่อสารด้วย fragmented packets โดย source ต้องทำ fragmentation เอง</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Mobility EH</h4>
+                        <p>ใช้สำหรับรองรับ Mobile IPv6 service</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Authentication EH</h4>
+                        <p>คล้ายกับ authentication header ใน IPv4</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Encapsulating Security Payload EH</h4>
+                        <p>คล้ายกับ ESP header ใน IPv4 ข้อมูลหลัง ESP Header จะถูกเข้ารหัส</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Source Routing EH</h4>
+                        <p>กำหนดเส้นทางที่ packet ต้องผ่าน</p>
+                    </div>
+                </div>
+                
+                <h3>การประมวลผล Extension Headers</h3>
+                <div class="warning-box">
+                    <div class="content">
+                        <strong>สำคัญ:</strong> เฉพาะ Hop-by-Hop Extension Header เท่านั้นที่ router ทุกตัวต้องประมวลผล Extension Headers อื่นๆ สามารถส่งต่อได้โดยไม่ต้องประมวลผล
+                    </div>
+                </div>
+            </div>
+
+            <!-- การเปลี่ยนผ่านจาก IPv4 ไป IPv6 -->
+            <div class="section">
+                <h2>🔄 การเปลี่ยนผ่านจาก IPv4 ไป IPv6</h2>
+                
+                <h3>ความท้าทายในการเปลี่ยนผ่าน</h3>
+                <div class="info-box">
+                    <div class="content">
+                        เนื่องจากมีระบบจำนวนมากบนอินเทอร์เน็ต การเปลี่ยนผ่านจาก IPv4 ไป IPv6 ไม่สามารถทำได้ทันที จำเป็นต้องใช้เวลานานและต้องมีการเปลี่ยนผ่านที่ราบรื่น
+                    </div>
+                </div>
+                
+                <h3>กลยุทธ์การเปลี่ยนผ่าน</h3>
+                
+                <h4>1. Dual Stack</h4>
+                <div class="feature-card">
+                    <p><strong>แนวคิด:</strong> ระบบรองรับทั้ง IPv4 และ IPv6 พร้อมกัน</p>
+                    <p><strong>ข้อดี:</strong> ความเข้ากันได้สูง สามารถสื่อสารกับระบบเก่าและใหม่ได้</p>
+                    <p><strong>ข้อเสีย:</strong> ใช้ทรัพยากรมากขึ้น ต้องจัดการ 2 protocol stack</p>
+                </div>
+                
+                <h4>2. Tunneling</h4>
+                <div class="feature-card">
+                    <p><strong>แนวคิด:</strong> ห่อหุ้ม IPv6 datagram ใน IPv4 datagram</p>
+                    <p><strong>การทำงาน:</strong> IPv6 ถูกส่งผ่าน IPv4 network โดยการ encapsulation</p>
+                    <p><strong>ใช้เมื่อ:</strong> ต้องส่ง IPv6 ผ่าน IPv4-only network</p>
+                </div>
+                
+                <div class="code-block">
+ตัวอย่าง Tunneling Process:
+
+A (IPv6) → B (IPv4/IPv6 Gateway) → C (IPv4 Router) → E (IPv4/IPv6 Gateway) → F (IPv6)
+
+A-to-B: IPv6 packet
+B-to-C: IPv6 packet wrapped in IPv4 packet
+C-to-E: IPv4 packet (with IPv6 inside)
+E-to-F: IPv6 packet (unwrapped)
+                </div>
+            </div>
+
+            <!-- OSPFv3 -->
+            <div class="section">
+                <h2>🔀 OSPFv2 vs OSPFv3</h2>
+                
+                <h3>การพัฒนา OSPFv3</h3>
+                <div class="info-box">
+                    <div class="content">
+                        IETF พัฒนา OSPF version 3 (RFC 5340) เพื่อรองรับ IPv6 โดยเฉพาะ โดยคงหลักการและอัลกอริทึมพื้นฐานของ OSPF ไว้
+                    </div>
+                </div>
+                
+                <h3>ความแตกต่างหลัก</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>คุณสมบัติ</th>
+                            <th>OSPFv2 (IPv4)</th>
+                            <th>OSPFv3 (IPv6)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Address Size</strong></td>
+                            <td>32-bit IPv4 addresses</td>
+                            <td>128-bit IPv6 addresses</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Packet Format</strong></td>
+                            <td>รูปแบบเดิม</td>
+                            <td>รูปแบบใหม่เพื่อรองรับ IPv6</td>
+                        </tr>
+                        <tr>
+                            <td><strong>LSA Format</strong></td>
+                            <td>รูปแบบเดิม</td>
+                            <td>รูปแบบใหม่เพื่อรองรับ IPv6</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Multicast Addresses</strong></td>
+                            <td>224.0.0.5, 224.0.0.6</td>
+                            <td>FF02::5, FF02::6</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Authentication</strong></td>
+                            <td>ใน OSPF header</td>
+                            <td>ใช้ IPSec</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="warning-box">
+                    <div class="content">
+                        <strong>ข้อสำคัญ:</strong> แม้ว่าหลักการพื้นฐานจะเหมือนกัน แต่ OSPFv2 และ OSPFv3 ไม่สามารถทำงานร่วมกันได้โดยตรง
+                    </div>
+                </div>
+            </div>
+
+            <!-- ข้อดีและข้อเสีย -->
+            <div class="section">
+                <h2>⚖️ ข้อดีและข้อเสียของ IPv6</h2>
+                
+                <div class="feature-grid">
+                    <div class="feature-card" style="border-top-color: #27ae60;">
+                        <h4>✅ ข้อดี</h4>
+                        <ul style="padding-left: 20px;">
+                            <li><strong>Address Space ใหญ่:</strong> 128-bit address ให้ address space มหาศาล</li>
+                            <li><strong>ประสิทธิภาพ:</strong> Header ขนาดคงที่ ไม่มี checksum</li>
+                            <li><strong>Security:</strong> IPSec เป็น mandatory</li>
+                            <li><strong>QoS:</strong> รองรับ QoS ได้ดีขึ้น</li>
+                            <li><strong>Auto-configuration:</strong> Host สามารถกำหนด address เองได้</li>
+                            <li><strong>Mobility:</strong> รองรับ Mobile IPv6</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-card" style="border-top-color: #e74c3c;">
+                        <h4>❌ ข้อเสีย/ความท้าทาย</h4>
+                        <ul style="padding-left: 20px;">
+                            <li><strong>ความซับซ้อน:</strong> การเขียนและจำ address ยากขึ้น</li>
+                            <li><strong>การเปลี่ยนผ่าน:</strong> ต้องใช้เวลานานในการเปลี่ยนผ่าน</li>
+                            <li><strong>ความเข้ากันได้:</strong> ไม่เข้ากันกับ IPv4 โดยตรง</li>
+                            <li><strong>การฝึกอบรม:</strong> บุคลากรต้องเรียนรู้ใหม่</li>
+                            <li><strong>ค่าใช้จ่าย:</strong> อาจต้องอัพเกรดอุปกรณ์</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Best Practices -->
+            <div class="section">
+                <h2>🎯 Best Practices และคำแนะนำ</h2>
+                
+                <h3>การวางแผน IPv6 Deployment</h3>
+                <ol>
+                    <li><strong>การประเมินสถานการณ์:</strong> ตรวจสอบอุปกรณ์และระบบที่มีอยู่</li>
+                    <li><strong>การฝึกอบรม:</strong> เตรียมบุคลากรให้พร้อม</li>
+                    <li><strong>การทดสอบ:</strong> ทดสอบใน lab environment ก่อน</li>
+                    <li><strong>การ Deploy แบบค่อยเป็นค่อยไป:</strong> เริ่มจากส่วนที่ไม่สำคัญ</li>
+                    <li><strong>การติดตาม:</strong> monitor และ troubleshoot อย่างต่อเนื่อง</li>
+                </ol>
+                
+                <h3>การจัดการ IPv6 Address</h3>
+                <div class="info-box">
+                    <div class="content">
+                        <ul style="margin: 0; padding-left: 20px;">
+                            <li>วางแผน addressing scheme ให้ดี</li>
+                            <li>ใช้ prefix delegation อย่างมีประสิทธิภาพ</li>
+                            <li>พิจารณาใช้ DHCP สำหรับการจัดการ</li>
+                            <li>เก็บ documentation ให้ครบถ้วน</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <h3>การรักษาความปลอดภัย</h3>
+                <div class="warning-box">
+                    <div class="content">
+                        <ul style="margin: 0; padding-left: 20px;">
+                            <li>ใช้ IPSec เมื่อจำเป็น</li>
+                            <li>กำหนด firewall rules สำหรับ IPv6</li>
+                            <li>ระวัง IPv6 tunneling ที่อาจ bypass security</li>
+                            <li>ติดตาม IPv6 traffic อย่างต่อเนื่อง</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- สรุป -->
+            <div class="section">
+                <h2>📝 สรุป</h2>
+                
+                <div class="info-box">
+                    <div class="content">
+                        <h4>ประเด็นสำคัญที่ต้องจำ</h4>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li><strong>IPv6 เป็นอนาคตของอินเทอร์เน็ต</strong> ด้วย address space ที่ใหญ่พอสำหรับการเติบโตในอนาคต</li>
+                            <li><strong>การเปลี่ยนผ่านต้องทำอย่างค่อยเป็นค่อยไป</strong> โดยใช้กลยุทธ์ Dual Stack และ Tunneling</li>
+                            <li><strong>IPv6 มีความซับซ้อนมากขึ้น</strong> แต่ให้ประสิทธิภาพและความยืดหยุ่นที่ดีกว่า</li>
+                            <li><strong>การเตรียมความพร้อมเป็นสิ่งสำคัญ</strong> ทั้งด้านเทคนิคและบุคลากร</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="feature-card" style="margin-top: 20px; text-align: center;">
+                    <h4>🎓 แหล่งข้อมูลเพิ่มเติม</h4>
+                    <p>
+                        • RFC 2460 - Internet Protocol, Version 6 (IPv6)<br>
+                        • RFC 5340 - OSPF for IPv6<br>
+                        • CCNA 200-301 Official Cert Guide<br>
+                        • Computer Networking: A Top-Down Approach
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function downloadPDF() {
+            // สร้าง link สำหรับดาวน์โหลด
+            const element = document.querySelector('.container');
+            const opt = {
+                margin: 0.5,
+                filename: 'IPv6_Summary_Complete.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2,
+                    useCORS: true,
+                    letterRendering: true
+                },
+                jsPDF: { 
+                    unit: 'in', 
+                    format: 'a4', 
+                    orientation: 'portrait' 
+                }
+            };
+            
+            // ถ้ามี html2pdf library
+            if (typeof html2pdf !== 'undefined') {
+                html2pdf().set(opt).from(element).save();
+            } else {
+                // Fallback: ใช้ window.print()
+                window.print();
+            }
+        }
+
+        // เพิ่ม smooth scrolling animation
+        document.querySelectorAll('.section').forEach((section, index) => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(30px)';
+            
+            setTimeout(() => {
+                section.style.transition = 'all 0.6s ease';
+                section.style.opacity = '1';
+                section.style.transform = 'translateY(0)';
+            }, index * 200);
+        });
+
+        // เพิ่ม animation สำหรับ table rows
+        document.querySelectorAll('.comparison-table tr').forEach((row, index) => {
+            row.addEventListener('mouseenter', () => {
+                row.style.transform = 'scale(1.02)';
+                row.style.transition = 'transform 0.2s ease';
+            });
+            
+            row.addEventListener('mouseleave', () => {
+                row.style.transform = 'scale(1)';
+            });
+        });
+
+        // เพิ่ม loading animation
+        window.addEventListener('load', () => {
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.5s ease';
+            
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
+        });
+    </script>
+
+    <!-- เพิ่ม html2pdf library สำหรับการดาวน์โหลด PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</body>
+</html>

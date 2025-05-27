@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สรุปเนื้อหา Network Layer Part 2</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Sarabun', sans-serif;
+            line-height: 1.8;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255,255,255,0.05) 10px,
+                rgba(255,255,255,0.05) 20px
+            );
+            animation: move 20s linear infinite;
+        }
+        
+        @keyframes move {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8f9ff;
+            border-radius: 15px;
+            border-left: 5px solid #4facfe;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(79, 172, 254, 0.2);
+        }
+        
+        .section h2 {
+            color: #2c3e50;
+            font-size: 1.8em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4facfe;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section h2::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #4facfe;
+            border-radius: 50%;
+            margin-right: 15px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.7; }
+        }
+        
+        .section h3 {
+            color: #34495e;
+            font-size: 1.4em;
+            font-weight: 500;
+            margin: 25px 0 15px 0;
+            padding-left: 20px;
+            border-left: 3px solid #74b9ff;
+        }
+        
+        .section p {
+            margin-bottom: 15px;
+            text-align: justify;
+            padding-left: 10px;
+        }
+        
+        .highlight {
+            background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #74b9ff;
+            position: relative;
+        }
+        
+        .highlight::before {
+            content: '💡';
+            font-size: 1.5em;
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background: white;
+            padding: 5px;
+            border-radius: 50%;
+        }
+        
+        .algorithm-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .algorithm-box h4 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .comparison-table th {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 15px;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .comparison-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9ff;
+        }
+        
+        .comparison-table tr:hover {
+            background: #e3f2fd;
+            transform: scale(1.02);
+            transition: all 0.3s ease;
+        }
+        
+        .protocol-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 4px solid #4facfe;
+            transition: transform 0.3s ease;
+        }
+        
+        .protocol-card:hover {
+            transform: translateX(10px);
+        }
+        
+        .protocol-card h4 {
+            color: #2c3e50;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .download-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.6);
+        }
+        
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; }
+            .download-btn { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌐 Network Layer Part 2</h1>
+            <p>Routing Protocols & Algorithms - สรุปเนื้อหาแบบลึกซึ้ง</p>
+        </div>
+        
+        <div class="content">
+            <div class="section">
+                <h2>🎯 ภาพรวม Routing Protocols</h2>
+                <p>Routing Protocols มีเป้าหมายหลักในการหาเส้นทาง (Path) ที่ "ดีที่สุด" จากโฮสต์ต้นทางไปยังโฮสต์ปลายทาง โดยผ่านเครือข่ายของเราเตอร์ต่างๆ</p>
+                
+                <div class="highlight">
+                    <strong>คำนิยาม "เส้นทางที่ดี":</strong> หมายถึงเส้นทางที่มี cost น้อยที่สุด, เร็วที่สุด, หรือมีการคับคั่งน้อยที่สุด
+                </div>
+                
+                <h3>🔄 การจำแนกประเภท Routing Algorithms</h3>
+                
+                <table class="comparison-table">
+                    <tr>
+                        <th>เกณฑ์การแบ่ง</th>
+                        <th>ประเภทที่ 1</th>
+                        <th>ประเภทที่ 2</th>
+                    </tr>
+                    <tr>
+                        <td><strong>ข้อมูลที่ใช้</strong></td>
+                        <td><strong>Global</strong><br>เราเตอร์ทุกตัวรู้ topology และ link cost ทั้งหมด<br>(Link State Algorithms)</td>
+                        <td><strong>Decentralized</strong><br>เราเตอร์รู้เฉพาะเพื่อนบ้านและ cost ไปหาพวกมัน<br>(Distance Vector Algorithms)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>การเปลี่ยนแปลง</strong></td>
+                        <td><strong>Static</strong><br>เส้นทางเปลี่ยนแปลงช้า</td>
+                        <td><strong>Dynamic</strong><br>เส้นทางเปลี่ยนแปลงเร็ว<br>- อัปเดตเป็นระยะ<br>- ตอบสนองต่อการเปลี่ยน link cost</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>🔗 Link State Algorithm: Dijkstra's Algorithm</h2>
+                
+                <div class="algorithm-box">
+                    <h4>หลักการทำงาน Dijkstra's Algorithm</h4>
+                    <p><strong>Input:</strong> Network topology และ link costs ที่ทุก node รู้จัก</p>
+                    <p><strong>Output:</strong> Shortest path tree จาก source ไปยัง destinations ทั้งหมด</p>
+                </div>
+                
+                <h3>🧮 สัญลักษณ์ที่ใช้</h3>
+                <div class="protocol-card">
+                    <p><strong>c(x,y):</strong> Link cost จาก node x ไป y (= ∞ ถ้าไม่ใช่เพื่อนบ้านโดยตรง)</p>
+                    <p><strong>D(v):</strong> ค่า cost ปัจจุบันจาก source ไป destination v</p>
+                    <p><strong>p(v):</strong> Node ก่อนหน้าในเส้นทางจาก source ไป v</p>
+                    <p><strong>N':</strong> เซ็ตของ nodes ที่ได้คำนวณ shortest path แล้ว</p>
+                </div>
+                
+                <h3>⚡ ข้อดีและข้อเสีย</h3>
+                <div class="highlight">
+                    <strong>ข้อดี:</strong>
+                    <p>• ให้ผลลัพธ์ที่แม่นยำและเหมาะสมที่สุด</p>
+                    <p>• Convergence เร็ว</p>
+                    <p>• ไม่มีปัญหา routing loops</p>
+                    
+                    <strong>ข้อเสีย:</strong>
+                    <p>• ต้องการ complete topology information</p>
+                    <p>• Memory และ processing overhead สูง</p>
+                    <p>• ต้อง flood link state ไปทั่วเครือข่าย</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📏 Distance Vector Algorithm: Bellman-Ford</h2>
+                
+                <div class="algorithm-box">
+                    <h4>Bellman-Ford Equation</h4>
+                    <p style="text-align: center; font-size: 1.2em; margin: 15px 0;">
+                        <strong>D<sub>x</sub>(y) = min<sub>v</sub> {c(x,v) + D<sub>v</sub>(y)}</strong>
+                    </p>
+                    <p>ความหมาย: Cost ที่น้อยที่สุดจาก x ไป y = min ของ (cost ไป neighbor v + cost จาก v ไป y)</p>
+                </div>
+                
+                <h3>🔄 กระบวนการทำงาน</h3>
+                <div class="protocol-card">
+                    <h4>Distance Vector Algorithm</h4>
+                    <p><strong>1.</strong> แต่ละ node เก็บ distance vector ของตัวเอง D<sub>x</sub> = [D<sub>x</sub>(y): y ∈ N]</p>
+                    <p><strong>2.</strong> แต่ละ node รู้ cost ไป neighbors และเก็บ distance vectors ของ neighbors</p>
+                    <p><strong>3.</strong> เป็นระยะ แต่ละ node ส่ง distance vector ให้ neighbors</p>
+                    <p><strong>4.</strong> เมื่อได้รับ DV ใหม่ จะอัปเดตโดยใช้ Bellman-Ford equation</p>
+                </div>
+                
+                <h3>⚠️ ปัญหาที่สำคัญ</h3>
+                <div class="highlight">
+                    <strong>Count-to-Infinity Problem:</strong>
+                    <p>เมื่อ link cost เพิ่มขึ้นอย่างมาก การข่าวร้ายจะแพร่กระจายช้า ทำให้เกิด routing loops และต้องใช้เวลานานในการ converge</p>
+                    
+                    <strong>วิธีแก้ไข - Poisoned Reverse:</strong>
+                    <p>ถ้า Z route ผ่าน Y เพื่อไป X, Z จะบอก Y ว่า distance ของ Z ไป X เป็น infinity เพื่อป้องกันไม่ให้ Y route กลับมาทาง Z</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🏢 Hierarchical Routing: Autonomous Systems</h2>
+                
+                <h3>🎯 ปัญหาการขยายขนาด (Scalability)</h3>
+                <p>เมื่อมี destinations หลายพันล้านแห่ง การเก็บทุก destination ใน routing table และการทำ DV algorithm จะไม่สามารถ converge ได้</p>
+                
+                <div class="highlight">
+                    <strong>วิธีแก้ไข:</strong> แบ่งเราเตอร์เป็นกลุ่มที่เรียกว่า "Autonomous Systems (AS)" หรือ "Domains"
+                </div>
+                
+                <h3>🔄 ประเภทของ Routing</h3>
+                <table class="comparison-table">
+                    <tr>
+                        <th>ประเภท</th>
+                        <th>Intra-AS Routing</th>
+                        <th>Inter-AS Routing</th>
+                    </tr>
+                    <tr>
+                        <td><strong>ขอบเขต</strong></td>
+                        <td>ภายใน AS เดียวกัน</td>
+                        <td>ระหว่าง AS ต่างๆ</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ความรับผิดชอบ</strong></td>
+                        <td>เราเตอร์ทั้งหมดใน AS ต้องใช้ protocol เดียวกัน</td>
+                        <td>Gateway routers ทำหน้าที่ inter-domain routing</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ตัวอย่าง Protocol</strong></td>
+                        <td>OSPF, RIP, EIGRP</td>
+                        <td>BGP</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>🦅 OSPF (Open Shortest Path First)</h2>
+                
+                <div class="protocol-card">
+                    <h4>คุณสมบัติหลัก OSPF</h4>
+                    <p><strong>• Open:</strong> เป็น public standard ไม่ใช่ proprietary</p>
+                    <p><strong>• Link-State:</strong> ใช้ Dijkstra's algorithm</p>
+                    <p><strong>• Flooding:</strong> แพร่กระจาย link-state advertisements ไปทั่ว AS</p>
+                    <p><strong>• Direct over IP:</strong> ไม่ผ่าน TCP หรือ UDP</p>
+                </div>
+                
+                <h3>🏗️ Hierarchical OSPF</h3>
+                <p>OSPF ใช้โครงสร้าง 2 ระดับ: local areas และ backbone</p>
+                
+                <div class="highlight">
+                    <strong>ประเภทของเราเตอร์ใน OSPF:</strong>
+                    <p><strong>Internal Routers:</strong> อยู่ภายใน area เดียว</p>
+                    <p><strong>Area Border Routers (ABR):</strong> เชื่อมต่อหลาย areas และสรุป distances</p>
+                    <p><strong>Backbone Routers:</strong> ทำ OSPF routing เฉพาะใน backbone</p>
+                    <p><strong>Boundary Routers:</strong> เชื่อมต่อไปยัง AS อื่น</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🌍 BGP (Border Gateway Protocol)</h2>
+                
+                <div class="algorithm-box">
+                    <h4>BGP - Inter-Domain Routing Protocol</h4>
+                    <p>BGP เป็น protocol สำหรับ routing ระหว่าง ISPs และ ASes ต่างๆ บนอินเทอร์เน็ต</p>
+                </div>
+                
+                <h3>🎯 หน้าที่หลักของ BGP</h3>
+                <div class="protocol-card">
+                    <p><strong>eBGP:</strong> รับข้อมูล subnet reachability จาก neighboring ASes</p>
+                    <p><strong>iBGP:</strong> แพร่กระจายข้อมูล reachability ไปยังเราเตอร์ทั้งหมดใน AS</p>
+                    <p><strong>Policy-based routing:</strong> เลือกเส้นทางที่ "ดี" ตาม policy และ reachability</p>
+                </div>
+                
+                <h3>📊 BGP Attributes</h3>
+                <table class="comparison-table">
+                    <tr>
+                        <th>Attribute</th>
+                        <th>คำอธิบาย</th>
+                        <th>ตัวอย่าง</th>
+                    </tr>
+                    <tr>
+                        <td><strong>AS-PATH</strong></td>
+                        <td>รายการ ASes ที่ advertisement ผ่าน</td>
+                        <td>AS2, AS3, X</td>
+                    </tr>
+                    <tr>
+                        <td><strong>NEXT-HOP</strong></td>
+                        <td>เราเตอร์ internal-AS ที่จะไปยัง next-hop AS</td>
+                        <td>Router interface IP</td>
+                    </tr>
+                </table>
+                
+                <div class="highlight">
+                    <strong>BGP Path Vector Protocol:</strong>
+                    <p>BGP เป็น "Path Vector" protocol ที่ advertise paths ไปยัง destination network prefixes ผ่าน semi-permanent TCP connections</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>⚖️ เปรียบเทียบ Routing Protocols</h2>
+                
+                <table class="comparison-table">
+                    <tr>
+                        <th>Protocol</th>
+                        <th>ประเภท</th>
+                        <th>Algorithm</th>
+                        <th>ขอบเขต</th>
+                        <th>ข้อดี</th>
+                        <th>ข้อเสีย</th>
+                    </tr>
+                    <tr>
+                        <td><strong>RIP</strong></td>
+                        <td>Intra-AS</td>
+                        <td>Distance Vector</td>
+                        <td>Small networks</td>
+                        <td>Simple, low overhead</td>
+                        <td>Slow convergence, count-to-infinity</td>
+                    </tr>
+                    <tr>
+                        <td><strong>OSPF</strong></td>
+                        <td>Intra-AS</td>
+                        <td>Link State</td>
+                        <td>Large networks</td>
+                        <td>Fast convergence, hierarchical</td>
+                        <td>Complex, high overhead</td>
+                    </tr>
+                    <tr>
+                        <td><strong>EIGRP</strong></td>
+                        <td>Intra-AS</td>
+                        <td>Enhanced DV</td>
+                        <td>Cisco networks</td>
+                        <td>Fast convergence, low bandwidth</td>
+                        <td>Proprietary (เมื่อก่อน)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>BGP</strong></td>
+                        <td>Inter-AS</td>
+                        <td>Path Vector</td>
+                        <td>Internet</td>
+                        <td>Policy-based, scalable</td>
+                        <td>Complex configuration</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>💡 สรุปสำคัญ</h2>
+                
+                <div class="highlight">
+                    <h3>🎯 แนวคิดหลัก</h3>
+                    <p><strong>1. Hierarchical Design:</strong> แบ่งเครือข่ายเป็น ASes เพื่อความ scalable</p>
+                    <p><strong>2. Specialized Protocols:</strong> ใช้ protocol ที่เหมาะสมกับขอบเขตการใช้งาน</p>
+                    <p><strong>3. Policy vs. Performance:</strong> Intra-AS เน้น performance, Inter-AS เน้น policy</p>
+                    <p><strong>4. Convergence Trade-offs:</strong> Link State เร็วแต่ใช้ทรัพยากรมาก, Distance Vector ช้าแต่ประหยัด</p>
+                </div>
+                
+                <div class="protocol-card">
+                    <h4>🔮 การเลือกใช้ Protocol</h4>
+                    <p><strong>เครือข่ายขนาดเล็ก:</strong> RIP เพียงพอ</p>
+                    <p><strong>เครือข่ายขนาดกลาง-ใหญ่:</strong> OSPF หรือ EIGRP</p>
+                    <p><strong>เชื่อมต่อ Internet:</strong> BGP จำเป็น</p>
+                    <p><strong>Multi-vendor environment:</strong> เลือก open standards (OSPF, BGP)</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>📚 สรุปโดย: AI Assistant | 🎓 วิชา: ENG23 3053 Computer Networks</p>
+            <p>📅 อัปเดต: พฤษภาคม 2567</p>
+            <button class="download-btn" onclick="window.print()">📄 Download เป็น PDF</button>
+        </div>
+    </div>
+
+    <script>
+        // Add smooth scrolling and interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add hover effects to sections
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => {
+                section.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                });
+                section.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+            
+            // Add click animation to tables
+            const tables = document.querySelectorAll('.comparison-table tr');
+            tables.forEach(row => {
+                row.addEventListener('click', function() {
+                    this.style.backgroundColor = '#e3f2fd';
+                    setTimeout(() => {
+                        this.style.backgroundColor = '';
+                    }, 300);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

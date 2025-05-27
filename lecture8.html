@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สรุป Network Address Translation และ Transport Layer</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            line-height: 1.8;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 210mm;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255,255,255,0.05) 10px,
+                rgba(255,255,255,0.05) 20px
+            );
+            animation: slide 20s linear infinite;
+        }
+
+        @keyframes slide {
+            0% { transform: translateX(-50px) translateY(-50px); }
+            100% { transform: translateX(50px) translateY(50px); }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            page-break-inside: avoid;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #3498db;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: #e74c3c;
+        }
+
+        .subsection {
+            margin-bottom: 25px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+            transition: all 0.3s ease;
+        }
+
+        .subsection:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .subsection-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .subsection-title::before {
+            content: '▶';
+            color: #3498db;
+            margin-right: 10px;
+            font-size: 0.8em;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(116, 185, 255, 0.3);
+        }
+
+        .highlight-box h4 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 15px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .comparison-table td {
+            padding: 15px;
+            border-bottom: 1px solid #ecf0f1;
+            vertical-align: top;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .comparison-table tr:hover {
+            background: #e3f2fd;
+            transition: all 0.3s ease;
+        }
+
+        .process-flow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .process-step {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .process-step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.2);
+        }
+
+        .process-step .step-number {
+            background: #3498db;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin: 0 auto 10px;
+        }
+
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Code Example';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background: #e74c3c;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .key-points {
+            background: linear-gradient(135deg, #00cec9 0%, #55efc4 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .key-points h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .key-points ul {
+            list-style: none;
+        }
+
+        .key-points li {
+            padding: 5px 0;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .key-points li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            
+            .section {
+                page-break-inside: avoid;
+            }
+        }
+
+        .nav-buttons {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            display: block;
+            background: #3498db;
+            color: white;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .nav-btn:hover {
+            background: #2980b9;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-buttons">
+        <button class="nav-btn" onclick="window.print()" title="พิมพ์ PDF">🖨️</button>
+        <button class="nav-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="กลับขึ้นบน">⬆️</button>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <h1>Network Address Translation (NAT)</h1>
+                <div class="subtitle">และภาพรวมของ Transport Layer</div>
+                <div style="margin-top: 20px; font-size: 0.9em; opacity: 0.8;">
+                    ENG23 3053 – Computer Networks | Dr. Parin Sornlertlamvanich
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- NAT Section -->
+            <div class="section">
+                <h2 class="section-title">1. Network Address Translation (NAT)</h2>
+                
+                <div class="highlight-box">
+                    <h4>🎯 วัตถุประสงค์หลักของ NAT</h4>
+                    <p>NAT เป็นโซลูชันระยะสั้นสำหรับปัญหาการขาดแคลน IPv4 Address โดยใช้ IP Address ที่ลงทะเบียนแล้วเพื่อแทนที่ Private IP Address ในแต่ละ IP Packet</p>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">1.1 Static NAT</h3>
+                    <p><strong>หลักการ:</strong> การแมป One-to-One ระหว่าง Private Address และ Registered Address</p>
+                    <div class="key-points">
+                        <h4>ข้อจำกัด:</h4>
+                        <ul>
+                            <li>หาก Enterprise มี Class C Network เพียง 1 เครือข่าย สามารถรองรับ Private IP ได้สูงสุด 254 ตัวเท่านั้น</li>
+                            <li>ไม่ช่วยลดการใช้ IPv4 Address</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">1.2 Dynamic NAT</h3>
+                    <p><strong>หลักการ:</strong> การแมป One-to-One แบบไดนามิกจาก Pool ของ Valid Inside Global Addresses</p>
+                    <div class="key-points">
+                        <h4>ลักษณะการทำงาน:</h4>
+                        <ul>
+                            <li>จัดสรร IP Address จาก Pool ของ Valid Inside Global Addresses</li>
+                            <li>หาก Packet ใหม่เข้ามาและต้องการ NAT Entry แต่ IP ใน Pool หมดแล้ว Router จะทิ้ง Packet นั้น</li>
+                            <li>ยังคงต้องการ Registered IP Address จำนวนมาก</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">1.3 NAT Overload (PAT - Port Address Translation)</h3>
+                    <p><strong>หลักการ:</strong> โซลูชันที่มีประสิทธิภาพที่สุด ช่วยให้ NAT รองรับ Client จำนวนมากด้วย Public IP เพียงไม่กี่ตัว</p>
+                    
+                    <div class="highlight-box">
+                        <h4>🔑 จุดสำคัญของ PAT</h4>
+                        <p>Server ไม่สนใจว่า TCP Connection มาจาก Host ตัวเดียวกันหรือต่างกัน เพียงแค่ส่งและรับข้อมูลผ่านแต่ละ Connection</p>
+                    </div>
+
+                    <div class="key-points">
+                        <h4>การทำงานของ PAT:</h4>
+                        <ul>
+                            <li>แปลทั้ง Address และ Port Number</li>
+                            <li>แปลง TCP/UDP Flows จาก Host ต่างๆ ให้เป็น Flows จาก Host เดียว</li>
+                            <li>ใช้ Public IP Address เพียงไม่กี่ตัวในการรองรับ Client จำนวนมาก</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transport Layer Section -->
+            <div class="section">
+                <h2 class="section-title">2. Transport Layer Overview</h2>
+                
+                <div class="highlight-box">
+                    <h4>🎯 หน้าที่หลักของ Transport Layer</h4>
+                    <p>จัดเตรียม Logical Communication ระหว่าง Application Processes ที่ทำงานใน Host ที่แตกต่างกัน</p>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">2.1 การเปรียบเทียบ Network Layer vs Transport Layer</h3>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Aspect</th>
+                                <th>Network Layer</th>
+                                <th>Transport Layer</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Communication</strong></td>
+                                <td>Logical communication ระหว่าง Hosts</td>
+                                <td>Logical communication ระหว่าง Processes</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Analogy</strong></td>
+                                <td>Postal Service (บริการไปรษณีย์)</td>
+                                <td>Ann และ Bill ที่ส่งจดหมายให้พี่น้องในบ้าน</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Function</strong></td>
+                                <td>เลือก Host ปลายทางด้วย IP Address</td>
+                                <td>เลือก Process ด้วย Port Number</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">2.2 IP Addresses และ Port Numbers</h3>
+                    <div class="key-points">
+                        <h4>บทบาทของแต่ละองค์ประกอบ:</h4>
+                        <ul>
+                            <li><strong>IP Address:</strong> เลือก Host ปลายทาง</li>
+                            <li><strong>Port Number:</strong> เลือก Process ใน Host นั้น</li>
+                            <li><strong>Port Range:</strong> 0 ถึง 65,535</li>
+                            <li><strong>Protocol Field:</strong> ระบุว่าเป็น TCP หรือ UDP Message</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Internet Transport Protocols -->
+            <div class="section">
+                <h2 class="section-title">3. Internet Transport-layer Protocols</h2>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">3.1 TCP (Transmission Control Protocol)</h3>
+                    <div class="key-points">
+                        <h4>คุณสมบัติหลักของ TCP:</h4>
+                        <ul>
+                            <li><strong>Reliable, in-order delivery:</strong> การส่งข้อมูลที่เชื่อถือได้และเป็นลำดับ</li>
+                            <li><strong>Congestion Control:</strong> ป้องกันไม่ให้ Sender กลุ่มหนึ่งใช้เครือข่ายจนเกินพิกัด</li>
+                            <li><strong>Flow Control:</strong> ป้องกันไม่ให้ Sender ที่เร็วส่งข้อมูลจนท่วม Receiver ที่ช้า</li>
+                            <li><strong>Connection Setup:</strong> ต้องสร้าง Connection ก่อนส่งข้อมูล</li>
+                        </ul>
+                    </div>
+
+                    <div class="highlight-box">
+                        <h4>🔗 TCP Connection Characteristics</h4>
+                        <ul style="list-style: none; padding: 0;">
+                            <li>✓ <strong>Point-to-Point:</strong> One sender, One receiver</li>
+                            <li>✓ <strong>Full Duplex:</strong> การส่งข้อมูลสองทิศทางใน Connection เดียว</li>
+                            <li>✓ <strong>Connection-oriented:</strong> Handshaking ก่อนแลกเปลี่ยนข้อมูล</li>
+                            <li>✓ <strong>Flow Controlled:</strong> Sender จะไม่ส่งข้อมูลจนท่วม Receiver</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">3.2 TCP 3-Way Handshake</h3>
+                    <div class="process-flow">
+                        <div class="process-step">
+                            <div class="step-number">1</div>
+                            <h4>SYN</h4>
+                            <p>Client ส่ง SYN bit=1, Seq=x</p>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">2</div>
+                            <h4>SYN-ACK</h4>
+                            <p>Server ตอบ SYN bit=1, ACK bit=1, Seq=y, ACK num=x+1</p>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">3</div>
+                            <h4>ACK</h4>
+                            <p>Client ส่ง ACK bit=1, ACK num=y+1</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">3.3 UDP (User Datagram Protocol)</h3>
+                    <div class="key-points">
+                        <h4>คุณสมบัติของ UDP:</h4>
+                        <ul>
+                            <li><strong>Connectionless:</strong> ไม่มี Handshaking ระหว่าง Sender และ Receiver</li>
+                            <li><strong>Unreliable:</strong> UDP Segments อาจสูญหายหรือมาไม่เป็นลำดับ</li>
+                            <li><strong>Best Effort Service:</strong> ทำดีที่สุดแต่ไม่การันตี</li>
+                            <li><strong>Simple:</strong> ไม่มี Connection State</li>
+                            <li><strong>Small Header Size:</strong> Header ขนาดเล็ก</li>
+                        </ul>
+                    </div>
+
+                    <div class="highlight-box">
+                        <h4>📝 การใช้งาน UDP</h4>
+                        <ul style="list-style: none; padding: 0;">
+                            <li>🎵 <strong>Streaming Multimedia Apps:</strong> ทนต่อการสูญหาย, สำคัญกับอัตรา</li>
+                            <li>🌐 <strong>DNS:</strong> Domain Name System</li>
+                            <li>📊 <strong>SNMP:</strong> Simple Network Management Protocol</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">3.4 TCP vs UDP Comparison</h3>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>TCP</th>
+                                <th>UDP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Connection</strong></td>
+                                <td>Connection-oriented</td>
+                                <td>Connectionless</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Reliability</strong></td>
+                                <td>Reliable</td>
+                                <td>Unreliable</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Order</strong></td>
+                                <td>In-order delivery</td>
+                                <td>No order guarantee</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Speed</strong></td>
+                                <td>Slower (overhead)</td>
+                                <td>Faster (minimal overhead)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Header Size</strong></td>
+                                <td>20+ bytes</td>
+                                <td>8 bytes</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Flow Control</strong></td>
+                                <td>Yes</td>
+                                <td>No</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Congestion Control</strong></td>
+                                <td>Yes</td>
+                                <td>No</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- QUIC Section -->
+            <div class="section">
+                <h2 class="section-title">4. QUIC Protocol</h2>
+                
+                <div class="highlight-box">
+                    <h4>🚀 Quick UDP Internet Connections (QUIC)</h4>
+                    <p>RFC 9000 - สร้างขึ้นบน UDP เพื่อปรับปรุง Security และ Performance เมื่อเทียบกับ TCP/HTTP2</p>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">4.1 ข้อดีของ QUIC เมื่อเทียบกับ TCP</h3>
+                    <div class="key-points">
+                        <h4>การปรับปรุงหลัก:</h4>
+                        <ul>
+                            <li><strong>Independent Byte Streams:</strong> QUIC ส่ง Byte Streams แยกอิสระ</li>
+                            <li><strong>Remove Head-of-Line Blocking:</strong> ขจัด HoL Blocking</li>
+                            <li><strong>Single Exchange Handshake:</strong> QUIC-TLS ทำ Cryptographic Handshake ในครั้งเดียว</li>
+                            <li><strong>Improved Session Performance:</strong> ประสิทธิภาพ Session ที่ดีขึ้น</li>
+                        </ul>
+                    </div>
+
+                    <div class="comparison-table" style="margin-top: 20px;">
+                        <thead>
+                            <tr>
+                                <th>Aspect</th>
+                                <th>TCP + TLS</th>
+                                <th>QUIC</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Handshake</strong></td>
+                                <td>TCP 3-way + TLS negotiation</td>
+                                <td>Single QUIC-TLS exchange</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Head-of-Line Blocking</strong></td>
+                                <td>มีปัญหา HoL Blocking</td>
+                                <td>ไม่มี HoL Blocking</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Stream Independence</strong></td>
+                                <td>Streams ขึ้นต่อกัน</td>
+                                <td>Independent streams</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DHCP Section -->
+            <div class="section">
+                <h2 class="section-title">5. Dynamic Host Configuration Protocol (DHCP)</h2>
+                
+                <div class="highlight-box">
+                    <h4>🎯 วัตถุประสงค์ของ DHCP</h4>
+                    <p>ให้ Host สามารถได้รับ IP Address แบบไดนามิกจาก Network Server เมื่อเข้าร่วมเครือข่าย</p>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">5.1 DHCP Process (4 Steps)</h3>
+                    <div class="process-flow">
+                        <div class="process-step">
+                            <div class="step-number">1</div>
+                            <h4>DHCP Discover</h4>
+                            <p>Host broadcast "มี DHCP Server ไหม?"</p>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">2</div>
+                            <h4>DHCP Offer</h4>
+                            <p>Server ตอบ "ฉันคือ DHCP Server! นี่คือ IP ที่ใช้ได้"</p>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">3</div>
+                            <h4>DHCP Request</h4>
+                            <p>Host ตอบ "ตกลง ฉันจะใช้ IP นั้น!"</p>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">4</div>
+                            <h4>DHCP ACK</h4>
+                            <p>Server ยืนยัน "ตกลง คุณได้ IP นั้นแล้ว!"</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">5.2 ข้อมูลที่ DHCP สามารถส่งคืนได้</h3>
+                    <div class="key-points">
+                        <h4>นอกจาก IP Address แล้ว DHCP ยังให้:</h4>
+                        <ul>
+                            <li><strong>Default Gateway:</strong> Address ของ First-hop Router</li>
+                            <li><strong>DNS Server:</strong> Name และ IP Address ของ DNS Server</li>
+                            <li><strong>Network Mask:</strong> แยกส่วน Network กับ Host portion</li>
+                            <li><strong>Lease Time:</strong> ระยะเวลาที่สามารถใช้ IP Address ได้</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DNS Section -->
+            <div class="section">
+                <h2 class="section-title">6. Domain Name System (DNS)</h2>
+                
+                <div class="highlight-box">
+                    <h4>🌐 DNS: แปล Name เป็น IP Address</h4>
+                    <p>ระบบฐานข้อมูลแบบกระจายที่ใช้ลำดับชั้น (Hierarchy) ของ Name Servers จำนวนมาก เป็น Application-layer Protocol ที่ให้ Hosts และ Name Servers สื่อสารกันเพื่อแปลงชื่อ</p>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">6.1 การทำงานของ DNS</h3>
+                    <div class="key-points">
+                        <h4>กระบวนการ DNS Lookup:</h4>
+                        <ul>
+                            <li><strong>Step 1:</strong> Host ใช้ DNS เพื่อค้นหา IP Address</li>
+                            <li><strong>Step 2:</strong> Web Browser ไม่สามารถส่ง IP Packet ไปยัง Destination Name ได้โดยตรง</li>
+                            <li><strong>Step 3:</strong> Client ส่ง DNS Request ไป DNS Server (ปกติเรียนรู้ผ่าน DHCP)</li>
+                            <li><strong>Step 4:</strong> DNS Request ใช้ UDP Header กับ Destination Port 53</li>
+                            <li><strong>Step 5:</strong> Client เริ่มสร้าง TCP Connection ไป Web Server</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">6.2 Recursive DNS Lookup</h3>
+                    <p>เมื่อ Local DNS ไม่ทราบ Address ที่ต้องการ</p>
+                    
+                    <div class="process-flow">
+                        <div class="process-step">
+                            <div class="step-number">1</div>
+                            <h4>Client Request</h4>
+                            <p>Client ส่ง DNS Request</p>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">2</div>
+                            <h4>Root DNS</h4>
+                            <p>Enterprise DNS ถาม Root DNS Server</p>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">3</div>
+                            <h4>TLD Server</h4>
+                            <p>Root ส่งต่อไป Top-Level Domain Server (.com)</p>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">4</div>
+                            <h4>Authoritative</h4>
+                            <p>TLD ส่งต่อไป Authoritative DNS Server</p>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">5</div>
+                            <h4>Response</h4>
+                            <p>ส่ง DNS Reply กลับ Client</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Section -->
+            <div class="section">
+                <h2 class="section-title">7. สรุปประเด็นสำคัญ</h2>
+                
+                <div class="subsection">
+                    <h3 class="subsection-title">7.1 NAT Solutions Comparison</h3>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>NAT Type</th>
+                                <th>Mapping</th>
+                                <th>IP Usage</th>
+                                <th>Scalability</th>
+                                <th>Best Use Case</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Static NAT</strong></td>
+                                <td>1:1 Fixed</td>
+                                <td>High</td>
+                                <td>Low</td>
+                                <td>Server หรือ Device ที่ต้องการ Fixed IP</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Dynamic NAT</strong></td>
+                                <td>1:1 Dynamic</td>
+                                <td>High</td>
+                                <td>Medium</td>
+                                <td>Organization ที่มี Public IP หลายตัว</td>
+                            </tr>
+                            <tr>
+                                <td><strong>PAT/NAT Overload</strong></td>
+                                <td>Many:1 with Ports</td>
+                                <td>Low</td>
+                                <td>High</td>
+                                <td>Home/Small Office (แนะนำ)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">7.2 Protocol Selection Guidelines</h3>
+                    <div class="key-points">
+                        <h4>เลือก TCP เมื่อ:</h4>
+                        <ul>
+                            <li>ต้องการความเชื่อถือได้สูง (File Transfer, Email, Web Browsing)</li>
+                            <li>ข้อมูลต้องมาถึงครบถ้วนและเป็นลำดับ</li>
+                            <li>สามารถยอมรับ Overhead และ Latency ได้</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="key-points">
+                        <h4>เลือก UDP เมื่อ:</h4>
+                        <ul>
+                            <li>ความเร็วสำคัญกว่าความแม่นยำ (Gaming, Video Streaming)</li>
+                            <li>ข้อมูลสูญหายบ้างได้ไม่เป็นไร</li>
+                            <li>ต้องการ Low Latency (DNS Queries, SNMP)</li>
+                        </ul>
+                    </div>
+
+                    <div class="key-points">
+                        <h4>เลือก QUIC เมื่อ:</h4>
+                        <ul>
+                            <li>ต้องการความเร็วของ UDP + ความเชื่อถือของ TCP</li>
+                            <li>Web Applications ที่ต้องการ Performance สูง</li>
+                            <li>ต้องการ Multiplexing หลาย Streams โดยไม่มี Head-of-Line Blocking</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">7.3 Network Configuration Best Practices</h3>
+                    <div class="highlight-box">
+                        <h4>💡 คำแนะนำสำหรับการออกแบบเครือข่าย</h4>
+                        <ul style="list-style: none; padding: 0;">
+                            <li>🔒 <strong>Security:</strong> ใช้ Private IP Address ร่วมกับ NAT เพื่อซ่อน Internal Network</li>
+                            <li>⚡ <strong>Performance:</strong> เลือก Protocol ให้เหมาะกับ Application Requirements</li>
+                            <li>📊 <strong>Scalability:</strong> ใช้ PAT/NAT Overload สำหรับ Small-Medium Networks</li>
+                            <li>🔄 <strong>Automation:</strong> ใช้ DHCP เพื่อจัดการ IP Address แบบอัตโนมัติ</li>
+                            <li>🌐 <strong>Name Resolution:</strong> ตั้งค่า DNS Server ให้ถูกต้องสำหรับ Internet Access</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technical Details Section -->
+            <div class="section">
+                <h2 class="section-title">8. รายละเอียดทางเทคนิค</h2>
+                
+                <div class="subsection">
+                    <h3 class="subsection-title">8.1 TCP Flow Control Mechanism</h3>
+                    <div class="highlight-box">
+                        <h4>🔄 Flow Control ใน TCP</h4>
+                        <p>กลไก Flow Control จะแจ้งให้ Sender ทราบความเร็วสูงสุดที่สามารถส่งข้อมูลไป Receiver ได้ โดย Sender จะปรับความเร็วตามความสามารถของ Receiver เพื่อลดการสูญหายของ Frame</p>
+                    </div>
+                    
+                    <div class="key-points">
+                        <h4>Sequence Numbers และ Acknowledgements:</h4>
+                        <ul>
+                            <li><strong>Sequence Numbers:</strong> หมายเลข Byte Stream ของ Byte แรกใน Segment's Data</li>
+                            <li><strong>Acknowledgements:</strong> Sequence Number ของ Byte ถัดไปที่คาดหวังจากอีกฝั่ง</li>
+                            <li><strong>Cumulative ACK:</strong> การ ACK แบบสะสม</li>
+                            <li><strong>Out-of-order Segments:</strong> TCP Spec ไม่ได้กำหนดการจัดการ ขึ้นอยู่กับผู้พัฒนา</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">8.2 TCP Connection Termination</h3>
+                    <div class="process-flow">
+                        <div class="process-step">
+                            <div class="step-number">1</div>
+                            <h4>FIN from Client</h4>
+                            <p>Client ส่ง FIN bit=1, seq=x</p>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">2</div>
+                            <h4>ACK from Server</h4>
+                            <p>Server ตอบ ACK bit=1, ACK num=x+1</p>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">3</div>
+                            <h4>FIN from Server</h4>
+                            <p>Server ส่ง FIN bit=1, seq=y</p>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">4</div>
+                            <h4>Final ACK</h4>
+                            <p>Client ส่ง ACK bit=1, ACK num=y+1</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">8.3 UDP Segment Format</h3>
+                    <div class="code-block">
+                        <pre>
+┌─────────────────┬─────────────────┐
+│   Source Port   │   Dest Port     │  (16 bits each)
+├─────────────────┼─────────────────┤
+│     Length      │    Checksum     │  (16 bits each)
+├─────────────────┴─────────────────┤
+│                                   │
+│        Application Data           │
+│            (Payload)              │
+│                                   │
+└───────────────────────────────────┘
+
+• Length: ความยาวของ UDP Segment รวม Header (bytes)
+• Checksum: ตรวจสอบความผิดพลาดของ Header และ Data
+                        </pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Practical Applications -->
+            <div class="section">
+                <h2 class="section-title">9. การประยุกต์ใช้งานจริง</h2>
+                
+                <div class="subsection">
+                    <h3 class="subsection-title">9.1 Real-world NAT Implementation</h3>
+                    <div class="key-points">
+                        <h4>ตัวอย่างการใช้งาน NAT ในองค์กร:</h4>
+                        <ul>
+                            <li><strong>Home Router:</strong> ใช้ PAT เพื่อให้อุปกรณ์หลายตัวใช้ Internet ผ่าน IP เดียว</li>
+                            <li><strong>Corporate Firewall:</strong> ใช้ Static NAT สำหรับ Servers ที่ต้องการเข้าถึงจาก Internet</li>
+                            <li><strong>ISP Networks:</strong> ใช้ Dynamic NAT เพื่อจัดสรร Public IP ให้ลูกค้า</li>
+                            <li><strong>Cloud Providers:</strong> ใช้ NAT Gateway เพื่อให้ Private Instances เข้าถึง Internet</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">9.2 Protocol Usage in Modern Applications</h3>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Application</th>
+                                <th>Protocol</th>
+                                <th>Port</th>
+                                <th>Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Web Browsing</strong></td>
+                                <td>TCP (HTTP/HTTPS)<br>QUIC (HTTP/3)</td>
+                                <td>80, 443</td>
+                                <td>ต้องการความเชื่อถือได้, การเข้ารหัส</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Video Streaming</strong></td>
+                                <td>UDP (RTP)<br>TCP (HLS/DASH)</td>
+                                <td>Variable</td>
+                                <td>Real-time vs Buffered streaming</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Online Gaming</strong></td>
+                                <td>UDP</td>
+                                <td>Variable</td>
+                                <td>Low latency สำคัญกว่าความสมบูรณ์</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Email</strong></td>
+                                <td>TCP (SMTP/IMAP/POP3)</td>
+                                <td>22, 143, 110</td>
+                                <td>ข้อมูลต้องครบถ้วนและถูกต้อง</td>
+                            </tr>
+                            <tr>
+                                <td><strong>DNS Lookup</strong></td>
+                                <td>UDP (Primary)<br>TCP (Fallback)</td>
+                                <td>53</td>
+                                <td>เร็ว, ข้อมูลสั้น</td>
+                            </tr>
+                            <tr>
+                                <td><strong>File Transfer</strong></td>
+                                <td>TCP (FTP/SFTP)</td>
+                                <td>21, 22</td>
+                                <td>ความสมบูรณ์ของไฟล์สำคัญ</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Troubleshooting Guide -->
+            <div class="section">
+                <h2 class="section-title">10. คู่มือการแก้ไขปัญหา</h2>
+                
+                <div class="subsection">
+                    <h3 class="subsection-title">10.1 NAT Troubleshooting</h3>
+                    <div class="key-points">
+                        <h4>ปัญหาที่พบบ่อยและวิธีแก้ไข:</h4>
+                        <ul>
+                            <li><strong>Port Exhaustion:</strong> เมื่อ PAT ใช้ Port หมด → เพิ่ม Public IP หรือปรับ Timeout</li>
+                            <li><strong>Application Issues:</strong> บาง Apps ไม่ทำงานผ่าน NAT → ใช้ Port Forwarding หรือ UPnP</li>
+                            <li><strong>Gaming Problems:</strong> P2P Gaming ไม่เชื่อมต่อได้ → กำหนด Static Port Mapping</li>
+                            <li><strong>VoIP Quality:</strong> เสียงตัด หรือ Echo → ปรับ NAT Timeout และ QoS</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">10.2 Transport Layer Issues</h3>
+                    <div class="key-points">
+                        <h4>การวินิจฉัยปัญหา TCP/UDP:</h4>
+                        <ul>
+                            <li><strong>TCP Connection Timeout:</strong> ตรวจสอบ Firewall, Network Latency</li>
+                            <li><strong>Slow TCP Performance:</strong> ปรับ Window Size, ตรวจสอบ Packet Loss</li>
+                            <li><strong>UDP Packet Loss:</strong> ปรับ Buffer Size, ตรวจสอบ Network Congestion</li>
+                            <li><strong>Port Conflicts:</strong> ใช้ netstat เพื่อตรวจสอบ Port ที่ใช้งาน</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">10.3 DHCP/DNS Troubleshooting</h3>
+                    <div class="key-points">
+                        <h4>ปัญหา Network Configuration:</h4>
+                        <ul>
+                            <li><strong>No IP Address:</strong> ตรวจสอบ DHCP Server, Network Cable</li>
+                            <li><strong>Wrong Gateway:</strong> ตรวจสอบ DHCP Scope Configuration</li>
+                            <li><strong>DNS Resolution Failed:</strong> ตรวจสอบ DNS Server Settings, ใช้ nslookup</li>
+                            <li><strong>Slow DNS:</strong> เปลี่ยน DNS Server (8.8.8.8, 1.1.1.1)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>สรุปโดย:</strong> Dr. Parin Sornlertlamvanich | <strong>รายวิชา:</strong> ENG23 3053 – Computer Networks</p>
+            <p style="margin-top: 10px; font-size: 0.9em; opacity: 0.8;">
+                📚 อ้างอิง: CCNA 200-301 Official Cert Guide | Computer Networking: A Top-Down Approach | Computer Networking Problems and Solutions
+            </p>
+            <p style="margin-top: 15px; font-size: 0.8em;">
+                © 2024 Suranaree University of Technology | จัดทำเพื่อการศึกษา
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Smooth scrolling for navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add print styles
+            const printStyles = `
+                <style media="print">
+                    body { 
+                        background: white !important; 
+                        font-size: 12pt;
+                        line-height: 1.4;
+                    }
+                    .nav-buttons { display: none !important; }
+                    .container { 
+                        box-shadow: none !important; 
+                        border-radius: 0 !important;
+                        max-width: 100% !important;
+                        margin: 0 !important;
+                    }
+                    .header {
+                        background: #2c3e50 !important;
+                        -webkit-print-color-adjust: exact;
+                        color-adjust: exact;
+                    }
+                    .section { 
+                        page-break-inside: avoid;
+                        margin-bottom: 30px;
+                    }
+                    .section-title {
+                        page-break-after: avoid;
+                    }
+                    .subsection {
+                        page-break-inside: avoid;
+                        margin-bottom: 20px;
+                    }
+                    .comparison-table {
+                        page-break-inside: avoid;
+                        font-size: 10pt;
+                    }
+                    .process-flow {
+                        page-break-inside: avoid;
+                    }
+                    .highlight-box, .key-points {
+                        -webkit-print-color-adjust: exact;
+                        color-adjust: exact;
+                    }
+                </style>
+            `;
+            document.head.insertAdjacentHTML('beforeend', printStyles);
+
+            // Add hover effects
+            const subsections = document.querySelectorAll('.subsection');
+            subsections.forEach(section => {
+                section.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateX(5px)';
+                });
+                section.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateX(0)';
+                });
+            });
+
+            // Add table row hover effects
+            const tableRows = document.querySelectorAll('.comparison-table tr');
+            tableRows.forEach(row => {
+                row.addEventListener('mouseenter', function() {
+                    if (!this.querySelector('th')) {
+                        this.style.backgroundColor = '#e3f2fd';
+                    }
+                });
+                row.addEventListener('mouseleave', function() {
+                    if (!this.querySelector('th')) {
+                        this.style.backgroundColor = '';
+                    }
+                });
+            });
+
+            // Animate process steps on scroll
+            const processSteps = document.querySelectorAll('.process-step');
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animation = 'slideInUp 0.6s ease-out forwards';
+                    }
+                });
+            }, observerOptions);
+
+            processSteps.forEach(step => {
+                observer.observe(step);
+            });
+
+            // Add slideInUp animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(30px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+
+        // Print function
+        function printPDF() {
+            window.print();
+        }
+    </script>
+</body>
+</html>
