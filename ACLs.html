@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คู่มือ Access Control Lists (ACLs) ฉบับสมบูรณ์</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Sarabun', sans-serif;
+            line-height: 1.8;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 210mm;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255,255,255,0.05) 10px,
+                rgba(255,255,255,0.05) 20px
+            );
+            animation: slide 20s linear infinite;
+        }
+        
+        @keyframes slide {
+            0% { transform: translateX(-50px); }
+            100% { transform: translateX(50px); }
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #3498db;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: #e74c3c;
+        }
+        
+        .subsection {
+            margin-bottom: 25px;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 5px solid #3498db;
+        }
+        
+        .subsection h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin: 15px 0;
+            overflow-x: auto;
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .code-block .comment {
+            color: #95a5a6;
+            font-style: italic;
+        }
+        
+        .code-block .command {
+            color: #f39c12;
+            font-weight: bold;
+        }
+        
+        .code-block .parameter {
+            color: #2ecc71;
+        }
+        
+        .example-box {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .example-box h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        th {
+            background: #3498db;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .highlight {
+            background: linear-gradient(120deg, #f1c40f 0%, #f39c12 100%);
+            color: #2c3e50;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .network-diagram {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: #ecf0f1;
+            border-radius: 10px;
+        }
+        
+        ul, ol {
+            margin-left: 25px;
+            margin-bottom: 15px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        .footer {
+            background: #34495e;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            
+            .header::before {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Access Control Lists (ACLs)</h1>
+            <p>คู่มือฉบับสมบูรณ์สำหรับการกำหนดค่าและใช้งาน ACLs บน Cisco Router</p>
+        </div>
+        
+        <div class="content">
+            <!-- บทนำ -->
+            <div class="section">
+                <h2 class="section-title">🔰 บทนำเกี่ยวกับ Access Control Lists</h2>
+                <div class="subsection">
+                    <h3>ACLs คืออะไร?</h3>
+                    <p><strong>Access Control Lists (ACLs)</strong> เป็นเครื่องมือที่ให้ Network Engineers สามารถตั้งโปรแกรม Filter ใน Router เพื่อควบคุมการไหลของ Packets ทั้งในทิศทาง Inbound และ Outbound</p>
+                    
+                    <div class="info-box">
+                        <strong>หลักการทำงาน:</strong> ACL จะตรวจสอบ Headers ของ Packets (IP, TCP, UDP) และตัดสินใจว่าจะอนุญาต (permit) หรือปฏิเสธ (deny) Packet นั้น
+                    </div>
+                    
+                    <h4>คุณสมบัติหลักของ ACLs:</h4>
+                    <ul>
+                        <li>ควบคุมการเข้าถึงโดยใช้ <span class="highlight">First-Match Logic</span></li>
+                        <li>สามารถ Filter ได้หลายเงื่อนไข เช่น Source/Destination IP, Port Numbers</li>
+                        <li>มี Implicit Deny All ที่ท้าย ACL เสมอ</li>
+                        <li>ทำงานแบบ Sequential (เรียงลำดับ)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ACL Location and Direction -->
+            <div class="section">
+                <h2 class="section-title">📍 ตำแหน่งและทิศทางของ ACL</h2>
+                <div class="subsection">
+                    <h3>การกำหนดตำแหน่ง ACL</h3>
+                    <p>ACL ต้องถูกผูกกับ Interface และกำหนดทิศทางการไหลของ Packet:</p>
+                    
+                    <div class="network-diagram">
+                        <strong>ตัวอย่างการวาง ACL:</strong><br>
+                        [PC] ← → [R1 F0/0] ← → [WAN] ← → [R2 S0/0/1] ← → [R2 F0/0] ← → [Server]
+                    </div>
+                    
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ตำแหน่ง</th>
+                                    <th>ทิศทาง</th>
+                                    <th>การทำงาน</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>R1's F0/0</td>
+                                    <td>Inbound</td>
+                                    <td>Filter Packets ที่เข้ามาจาก PC</td>
+                                </tr>
+                                <tr>
+                                    <td>R1's S0/0/0</td>
+                                    <td>Outbound</td>
+                                    <td>Filter Packets ที่ส่งออกไป WAN</td>
+                                </tr>
+                                <tr>
+                                    <td>R2's S0/0/1</td>
+                                    <td>Inbound</td>
+                                    <td>Filter Packets ที่เข้ามาจาก WAN</td>
+                                </tr>
+                                <tr>
+                                    <td>R2's F0/0</td>
+                                    <td>Outbound</td>
+                                    <td>Filter Packets ที่ส่งไป Server</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Types of ACLs -->
+            <div class="section">
+                <h2 class="section-title">🔢 ประเภทของ IP ACLs</h2>
+                <div class="subsection">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ประเภท ACL</th>
+                                    <th>หมายเลข</th>
+                                    <th>ความสามารถ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Standard Numbered ACLs</strong></td>
+                                    <td>1-99, 1300-1999</td>
+                                    <td>Filter เฉพาะ Source IP Address</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Extended Numbered ACLs</strong></td>
+                                    <td>100-199, 2000-2699</td>
+                                    <td>Filter หลายเงื่อนไข (Protocol, Source/Dest IP, Port)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Named ACLs</strong></td>
+                                    <td>ใช้ชื่อแทนหมายเลข</td>
+                                    <td>จัดการและแก้ไขได้ง่าย มี Sequence Numbers</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Standard ACLs -->
+            <div class="section">
+                <h2 class="section-title">🏷️ Standard Numbered ACLs (1-99)</h2>
+                <div class="subsection">
+                    <h3>หลักการทำงาน</h3>
+                    <p>Standard ACL สามารถ Match ได้เฉพาะ <strong>Source IP Address</strong> เท่านั้น และใช้ <strong>First-Match Logic</strong></p>
+                    
+                    <div class="warning-box">
+                        <strong>ข้อจำกัด:</strong> ไม่สามารถระบุ Destination IP, Protocol, หรือ Port Numbers ได้
+                    </div>
+                    
+                    <h3>รูปแบบคำสั่งพื้นฐาน</h3>
+                    <div class="code-block">
+<span class="command">Router(config)# access-list</span> <span class="parameter">[ACL-number]</span> <span class="parameter">[permit|deny]</span> <span class="parameter">[source-IP]</span> <span class="parameter">[wildcard-mask]</span>
+<span class="command">Router(config)# interface</span> <span class="parameter">[interface-type number]</span>
+<span class="command">Router(config-if)# ip access-group</span> <span class="parameter">[ACL-number]</span> <span class="parameter">[in|out]</span>
+                    </div>
+                    
+                    <div class="example-box">
+                        <h4>ตัวอย่างที่ 1: ปฏิเสธ Host เดียว</h4>
+                        <div class="code-block">
+<span class="comment">! ปฏิเสธ IP 192.168.1.100 และอนุญาตที่เหลือทั้งหมด</span>
+<span class="command">Router(config)# access-list 10 deny 192.168.1.100 0.0.0.0</span>
+<span class="command">Router(config)# access-list 10 permit any</span>
+
+<span class="comment">! Apply ACL เข้า Interface</span>
+<span class="command">Router(config)# interface fastethernet0/0</span>
+<span class="command">Router(config-if)# ip access-group 10 in</span>
+                        </div>
+                    </div>
+                    
+                    <div class="example-box">
+                        <h4>ตัวอย่างที่ 2: อนุญาตเฉพาะ Subnet</h4>
+                        <div class="code-block">
+<span class="comment">! อนุญาตเฉพาะ subnet 10.1.1.0/24</span>
+<span class="command">Router(config)# access-list 20 permit 10.1.1.0 0.0.0.255</span>
+<span class="comment">! Implicit deny all อยู่ที่ท้ายอัตโนมัติ</span>
+
+<span class="command">Router(config)# interface serial0/0/0</span>
+<span class="command">Router(config-if)# ip access-group 20 out</span>
+                        </div>
+                    </div>
+                    
+                    <div class="example-box">
+                        <h4>ตัวอย่างที่ 3: Multiple Rules</h4>
+                        <div class="code-block">
+<span class="comment">! ACL ที่มีหลายเงื่อนไข</span>
+<span class="command">Router(config)# access-list 30 deny 192.168.10.5 0.0.0.0</span>
+<span class="command">Router(config)# access-list 30 deny 192.168.10.0 0.0.0.7</span>
+<span class="command">Router(config)# access-list 30 permit 192.168.10.0 0.0.0.255</span>
+<span class="command">Router(config)# access-list 30 deny 192.168.0.0 0.0.255.255</span>
+<span class="command">Router(config)# access-list 30 permit any</span>
+                        </div>
+                        <p><strong>อธิบาย:</strong></p>
+                        <ul>
+                            <li>ปฏิเสธ 192.168.10.5</li>
+                            <li>ปฏิเสธ 192.168.10.0-192.168.10.7 (8 addresses)</li>
+                            <li>อนุญาต subnet 192.168.10.0/24 ที่เหลือ</li>
+                            <li>ปฏิเสธ network 192.168.0.0/16 ทั้งหมด</li>
+                            <li>อนุญาตที่เหลือทั้งหมด</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Extended ACLs -->
+            <div class="section">
+                <h2 class="section-title">🔧 Extended Numbered ACLs (100-199)</h2>
+                <div class="subsection">
+                    <h3>ความสามารถของ Extended ACLs</h3>
+                    <p>Extended ACL สามารถตรวจสอบได้หลายเงื่อนไขพร้อมกัน:</p>
+                    <ul>
+                        <li><strong>Protocol:</strong> IP, TCP, UDP, ICMP, etc.</li>
+                        <li><strong>Source IP Address</strong> และ Wildcard Mask</li>
+                        <li><strong>Destination IP Address</strong> และ Wildcard Mask</li>
+                        <li><strong>Source และ Destination Port Numbers</strong></li>
+                        <li><strong>TCP Flags, ICMP Types</strong> และอื่นๆ</li>
+                    </ul>
+                    
+                    <h3>รูปแบบคำสั่งสำหรับ TCP/UDP</h3>
+                    <div class="code-block">
+<span class="command">access-list</span> <span class="parameter">[100-199]</span> <span class="parameter">[permit|deny]</span> <span class="parameter">[protocol]</span> <span class="parameter">[source-IP wildcard]</span> <span class="parameter">[dest-IP wildcard]</span> <span class="parameter">[port-options]</span>
+                    </div>
+                    
+                    <div class="info-box">
+                        <strong>Port Options:</strong><br>
+                        • <code>eq [port]</code> - เท่ากับ port ที่ระบุ<br>
+                        • <code>ne [port]</code> - ไม่เท่ากับ port ที่ระบุ<br>
+                        • <code>lt [port]</code> - น้อยกว่า port ที่ระบุ<br>
+                        • <code>gt [port]</code> - มากกว่า port ที่ระบุ<br>
+                        • <code>range [port1] [port2]</code> - ช่วง port
+                    </div>
+                    
+                    <div class="example-box">
+                        <h4>ตัวอย่างที่ 1: Block Web Traffic</h4>
+                        <div class="code-block">
+<span class="comment">! ปฏิเสธการเข้าถึง Web (HTTP และ HTTPS) จาก subnet 192.168.1.0/24</span>
+<span class="command">Router(config)# access-list 100 deny tcp 192.168.1.0 0.0.0.255 any eq 80</span>
+<span class="command">Router(config)# access-list 100 deny tcp 192.168.1.0 0.0.0.255 any eq 443</span>
+<span class="command">Router(config)# access-list 100 permit ip any any</span>
+
+<span class="command">Router(config)# interface fastethernet0/1</span>
+<span class="command">Router(config-if)# ip access-group 100 in</span>
+                        </div>
+                    </div>
+                    
+                    <div class="example-box">
+                        <h4>ตัวอย่างที่ 2: Allow Specific Services</h4>
+                        <div class="code-block">
+<span class="comment">! อนุญาตเฉพาะ HTTP, HTTPS, DNS และ ICMP</span>
+<span class="command">Router(config)# access-list 110 permit tcp any any eq 80</span>
+<span class="command">Router(config)# access-list 110 permit tcp any any eq 443</span>
+<span class="command">Router(config)# access-list 110 permit tcp any any eq 53</span>
+<span class="command">Router(config)# access-list 110 permit udp any any eq 53</span>
+<span class="command">Router(config)# access-list 110 permit icmp any any</span>
+<span class="comment">! Implicit deny all ที่เหลือ</span>
+                        </div>
+                    </div>
+                    
+                    <div class="example-box">
+                        <h4>ตัวอย่างที่ 3: Complex Network Security</h4>
+                        <div class="code-block">
+<span class="comment">! Security Policy สำหรับ DMZ</span>
+<span class="command">Router(config)# access-list 120 permit tcp any 10.1.1.10 0.0.0.0 eq 80</span>
+<span class="command">Router(config)# access-list 120 permit tcp any 10.1.1.10 0.0.0.0 eq 443</span>
+<span class="command">Router(config)# access-list 120 permit tcp any 10.1.1.11 0.0.0.0 eq 25</span>
+<span class="command">Router(config)# access-list 120 deny tcp any 10.1.1.0 0.0.0.255 eq 22</span>
+<span class="command">Router(config)# access-list 120 permit tcp 10.1.2.0 0.0.0.255 10.1.1.0 0.0.0.255 eq 22</span>
+<span class="command">Router(config)# access-list 120 deny ip any any</span>
+                        </div>
+                        <p><strong>อธิบาย:</strong></p>
+                        <ul>
+                            <li>อนุญาต HTTP/HTTPS ไป Web Server (10.1.1.10)</li>
+                            <li>อนุญาต SMTP ไป Mail Server (10.1.1.11)</li>
+                            <li>ปฏิเสธ SSH จาก Internet ไป DMZ</li>
+                            <li>อนุญาต SSH เฉพาะจาก Management Network</li>
+                            <li>ปฏิเสธที่เหลือทั้งหมด</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="example-box">
+                        <h4>ตัวอย่างที่ 4: Port Range และ Well-Known Ports</h4>
+                        <div class="code-block">
+<span class="comment">! ใช้ Well-Known Port Names</span>
+<span class="command">Router(config)# access-list 130 permit tcp any any eq www</span>
+<span class="command">Router(config)# access-list 130 permit tcp any any eq ftp</span>
+<span class="command">Router(config)# access-list 130 permit tcp any any eq telnet</span>
+<span class="command">Router(config)# access-list 130 permit tcp any any eq smtp</span>
+
+<span class="comment">! ใช้ Port Range</span>
+<span class="command">Router(config)# access-list 130 permit tcp any any range 1024 65535</span>
+<span class="command">Router(config)# access-list 130 deny tcp any any lt 1024</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Named ACLs -->
+            <div class="section">
+                <h2 class="section-title">📝 Named ACLs</h2>
+                <div class="subsection">
+                    <h3>ข้อดีของ Named ACLs</h3>
+                    <ul>
+                        <li><strong>ชื่อที่มีความหมาย:</strong> ใช้ชื่อแทนหมายเลข ทำให้จำและเข้าใจได้ง่าย</li>
+                        <li><strong>ACL Subcommands:</strong> ใช้ Configuration Mode แยกต่างหาก</li>
+                        <li><strong>Sequence Numbers:</strong> สามารถแก้ไข เพิ่ม ลบ Entry ได้</li>
+                        <li><strong>การจัดการที่ดีกว่า:</strong> แก้ไขได้โดยไม่ต้องลบ ACL ทั้งหมด</li>
+                    </ul>
+                    
+                    <h3>รูปแบบคำสั่ง Named ACL</h3>
+                    <div class="code-block">
+<span class="comment">! สร้าง Named ACL</span>
+<span class="command">Router(config)# ip access-list</span> <span class="parameter">[standard|extended]</span> <span class="parameter">[ACL-name]</span>
+
+<span class="comment">! เข้าสู่ ACL Configuration Mode</span>
+<span class="command">Router(config-std-nacl)# [sequence-number] [permit|deny] [conditions]</span>
+                    </div>
+                    
+                    <div class="example-box">
+                        <h4>ตัวอย่างที่ 1: Named Standard ACL</h4>
+                        <div class="code-block">
+<span class="comment">! สร้าง Named Standard ACL</span>
+<span class="command">Router(config)# ip access-list standard BLOCK_MARKETING</span>
+<span class="command">Router(config-std-nacl)# 10 deny 192.168.100.0 0.0.0.255</span>
+<span class="command">Router(config-std-nacl)# 20 deny 192.168.101.0 0.0.0.255</span>
+<span class="command">Router(config-std-nacl)# 30 permit any</span>
+<span class="command">Router(config-std-nacl)# exit</span>
+
+<span class="comment">! Apply ACL</span>
+<span class="command">Router(config)# interface gigabitethernet0/0</span>
+<span class="command">Router(config-if)# ip access-group BLOCK_MARKETING out</span>
+                        </div>
+                    </div>
+                    
+                    <div class="example-box">
+                        <h4>ตัวอย่างที่ 2: Named Extended ACL</h4>
+                        <div class="code-block">
+<span class="comment">! สร้าง Named Extended ACL สำหรับ Security Policy</span>
+<span class="command">Router(config)# ip access-list extended DMZ_SECURITY</span>
+<span class="command">Router(config-ext-nacl)# 10 permit tcp any host 10.1.1.10 eq 80</span>
+<span class="command">Router(config-ext-nacl)# 20 permit tcp any host 10.1.1.10 eq 443</span>
+<span class="command">Router(config-ext-nacl)# 30 permit tcp any host 10.1.1.11 eq 25</span>
+<span class="command">Router(config-ext-nacl)# 40 permit tcp 10.1.2.0 0.0.0.255 10.1.1.0 0.0.0.255 eq 22</span>
+<span class="command">Router(config-ext-nacl)# 50 permit icmp any any echo-reply</span>
+<span class="command">Router(config-ext-nacl)# 60 deny ip any any</span>
+<span class="command">Router(config-ext-nacl)# exit</span>
+
+<span class="command">Router(config)# interface fastethernet0/0</span>
+<span class="command">Router(config-if)# ip access-group DMZ_SECURITY in</span>
+                        </div>
+                    </div>
+                    
+                    <h3>การแก้ไข Named ACLs ด้วย Sequence Numbers</h3>
+                    <div class="example-box">
+                        <h4>ตัวอย่างการแก้ไข ACL</h4>
+                        <div class="code-block">
+<span class="comment">! ดู ACL ปัจจุบัน</span>
+<span class="command">Router# show ip access-lists DMZ_SECURITY</span>
+
+<span class="comment">! เพิ่ม Entry ใหม่ระหว่าง line 20 และ 30</span>
+<span class="command">Router(config)# ip access-list extended DMZ_SECURITY</span>
+<span class="command">Router(config-ext-nacl)# 25 permit tcp any host 10.1.1.12 eq 21</span>
+
+<span class="comment">! ลบ Entry ที่ sequence 40</span>
+<span class="command">Router(config-ext-nacl)# no 40</span>
+
+<span class="comment">! แก้ไข Entry โดยลบแล้วเพิ่มใหม่</span>
+<span class="command">Router(config-ext-nacl)# no 50</span>
+<span class="command">Router(config-ext-nacl)# 50 permit icmp any any</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- First-Match Logic -->
+            <div class="section">
+                <h2 class="section-title">🎯 First-Match Logic และ Implicit Deny</h2>
+                <div class="subsection">
+                    <h3>หลักการ First-Match Logic</h3>
+                    <p>ACL ใช้หลักการ <strong>First-Match Logic</strong> หมายความว่า:</p>
+                    <ol>
+                        <li>Router จะตรวจสอบ Packet กับ ACL Entry ตามลำดับจากบนลงล่าง</li>
+                        <li>เมื่อ Packet ตรงกับ Entry ใดก็ตาม Router จะดำเนินการ (permit/deny) ทันที</li>
+                        <li>Router จะ<strong>หยุดการตรวจสอบ</strong> Entry ที่เหลือ</li>
+                        <li>หาก Packet ไม่ตรงกับ Entry ใดเลย จะถูก <strong>Deny โดย Implicit Deny All</strong></li>
+                    </ol>
+                    
+                    <div class="warning-box">
+                        <strong>สำคัญ:</strong> ลำดับของ ACL Entry มีความสำคัญมาก! Entry ที่เฉพาะเจาะจงควรอยู่ด้านบน และ Entry ที่กว้างๆ ควรอยู่ด้านล่าง
+                    </div>
+                    
+                    <div class="example-box">
+                        <h4>ตัวอย่างผลกระทบของลำดับ Entry</h4>
+                        <div class="code-block">
+<span class="comment">! ❌ ลำดับที่ผิด - จะไม่ทำงานตามต้องการ</span>
+<span class="command">Router(config)# access-list 50 permit any</span>
+<span class="command">Router(config)# access-list 50 deny 192.168.1.100 0.0.0.0</span>
+<span class="comment">! 192.168.1.100 จะไม่ถูก deny เพราะ permit any ก่อน</span>
+
+<span class="comment">! ✅ ลำดับที่ถูกต้อง</span>
+<span class="command">Router(config)# access-list 60 deny 192.168.1.100 0.0.0.0</span>
+<span class="command">Router(config)# access-list 60 permit any</span>
+<span class="comment">! 192.168.1.100 จะถูก deny, ที่เหลือจะถูก permit</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Port Numbers Reference -->
+            <div class="section">
+                <h2 class="section-title">🔌 Well-Known Port Numbers</h2>
+                <div class="subsection">
+                    <h3>Port Numbers ที่ใช้บ่อยใน ACLs</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Protocol</th>
+                                    <th>Port Number</th>
+                                    <th>Keyword</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>HTTP</td>
+                                    <td>80</td>
+                                    <td>www</td>
+                                    <td>Web browsing</td>
+                                </tr>
+                                <tr>
+                                    <td>HTTPS</td>
+                                    <td>443</td>
+                                    <td>-</td>
+                                    <td>Secure web browsing</td>
+                                </tr>
+                                <tr>
+                                    <td>FTP Data</td>
+                                    <td>20</td>
+                                    <td>ftp-data</td>
+                                    <td>File transfer data</td>
+                                </tr>
+                                <tr>
+                                    <td>FTP Control</td>
+                                    <td>21</td>
+                                    <td>ftp</td>
+                                    <td>File transfer control</td>
+                                </tr>
+                                <tr>
+                                    <td>SSH</td>
+                                    <td>22</td>
+                                    <td>-</td>
+                                    <td>Secure Shell</td>
+                                </tr>
+                                <tr>
+                                    <td>Telnet</td>
+                                    <td>23</td>
+                                    <td>telnet</td>
+                                    <td>Remote terminal</td>
+                                </tr>
+                                <tr>
+                                    <td>SMTP</td>
+                                    <td>25</td>
+                                    <td>smtp</td>
+                                    <td>Email sending</td>
+                                </tr>
+                                <tr>
+                                    <td>DNS</td>
+                                    <td>53</td>
+                                    <td>domain</td>
+                                    <td>Domain name resolution</td>
+                                </tr>
+                                <tr>
+                                    <td>DHCP Server</td>
+                                    <td>67</td>
+                                    <td>bootps</td>
+                                    <td>DHCP server</td>
+                                </tr>
+                                <tr>
+                                    <td>DHCP Client</td>
+                                    <td>68</td>
+                                    <td>bootpc</td>
+                                    <td>DHCP client</td>
+                                </tr>
+                                <tr>
+                                    <td>POP3</td>
+                                    <td>110</td>
+                                    <td>pop3</td>
+                                    <td>Email receiving</td>
+                                </tr>
+                                <tr>
+                                    <td>SNMP</td>
+                                    <td>161</td>
+                                    <td>snmp</td>
+                                    <td>Network management</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wildcard Masks -->
+            <div class="section">
+                <h2 class="section-title">🎭 Wildcard Masks</h2>
+                <div class="subsection">
+                    <h3>การทำความเข้าใจ Wildcard Masks</h3>
+                    <p>Wildcard Mask เป็นส่วนกลับของ Subnet Mask:</p>
+                    <ul>
+                        <li><strong>0</strong> = ต้องตรงกันทุก bit (must match)</li>
+                        <li><strong>1</strong> = ไม่สนใจ bit นี้ (don't care)</li>
+                    </ul>
+                    
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Subnet Mask</th>
+                                    <th>Wildcard Mask</th>
+                                    <th>CIDR</th>
+                                    <th>Meaning</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>255.255.255.255</td>
+                                    <td>0.0.0.0</td>
+                                    <td>/32</td>
+                                    <td>Host เดียว</td>
+                                </tr>
+                                <tr>
+                                    <td>255.255.255.0</td>
+                                    <td>0.0.0.255</td>
+                                    <td>/24</td>
+                                    <td>Subnet ทั้งหมด (254 hosts)</td>
+                                </tr>
+                                <tr>
+                                    <td>255.255.0.0</td>
+                                    <td>0.0.255.255</td>
+                                    <td>/16</td>
+                                    <td>Class B network</td>
+                                </tr>
+                                <tr>
+                                    <td>255.0.0.0</td>
+                                    <td>0.255.255.255</td>
+                                    <td>/8</td>
+                                    <td>Class A network</td>
+                                </tr>
+                                <tr>
+                                    <td>0.0.0.0</td>
+                                    <td>255.255.255.255</td>
+                                    <td>/0</td>
+                                    <td>Any/All networks</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="example-box">
+                        <h4>ตัวอย่างการใช้ Wildcard Masks</h4>
+                        <div class="code-block">
+<span class="comment">! Host เดียว 192.168.1.100</span>
+<span class="command">access-list 10 deny 192.168.1.100 0.0.0.0</span>
+<span class="comment">! หรือใช้ keyword "host"</span>
+<span class="command">access-list 10 deny host 192.168.1.100</span>
+
+<span class="comment">! Subnet 192.168.1.0/24 ทั้งหมด</span>
+<span class="command">access-list 10 permit 192.168.1.0 0.0.0.255</span>
+
+<span class="comment">! ทุก IP Address</span>
+<span class="command">access-list 10 permit 0.0.0.0 255.255.255.255</span>
+<span class="comment">! หรือใช้ keyword "any"</span>
+<span class="command">access-list 10 permit any</span>
+
+<span class="comment">! Range ของ IP (192.168.1.64 - 192.168.1.95)</span>
+<span class="command">access-list 10 permit 192.168.1.64 0.0.0.31</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Practical Examples -->
+            <div class="section">
+                <h2 class="section-title">💼 ตัวอย่างการใช้งานจริง</h2>
+                <div class="subsection">
+                    <h3>Scenario 1: Branch Office Security</h3>
+                    <p><strong>เงื่อนไข:</strong> Branch Office ต้องการควบคุมการเข้าถึง Internet</p>
+                    <ul>
+                        <li>อนุญาต HTTP, HTTPS, DNS สำหรับทุกคน</li>
+                        <li>ปฏิเสธ Social Media (Facebook, Twitter)</li>
+                        <li>อนุญาต FTP เฉพาะ Management VLAN</li>
+                        <li>ปฏิเสธ P2P Traffic</li>
+                    </ul>
+                    
+                    <div class="code-block">
+<span class="comment">! สร้าง Named Extended ACL</span>
+<span class="command">Router(config)# ip access-list extended BRANCH_INTERNET</span>
+
+<span class="comment">! อนุญาต DNS (UDP และ TCP)</span>
+<span class="command">Router(config-ext-nacl)# 10 permit udp any any eq 53</span>
+<span class="command">Router(config-ext-nacl)# 20 permit tcp any any eq 53</span>
+
+<span class="comment">! อนุญาต HTTP และ HTTPS</span>
+<span class="command">Router(config-ext-nacl)# 30 permit tcp any any eq 80</span>
+<span class="command">Router(config-ext-nacl)# 40 permit tcp any any eq 443</span>
+
+<span class="comment">! ปฏิเสธ Social Media (Facebook IPs example)</span>
+<span class="command">Router(config-ext-nacl)# 50 deny tcp any 31.13.64.0 0.0.31.255</span>
+<span class="command">Router(config-ext-nacl)# 60 deny tcp any 173.252.64.0 0.0.31.255</span>
+
+<span class="comment">! อนุญาต FTP เฉพาะ Management VLAN (192.168.10.0/24)</span>
+<span class="command">Router(config-ext-nacl)# 70 permit tcp 192.168.10.0 0.0.0.255 any eq 21</span>
+<span class="command">Router(config-ext-nacl)# 80 permit tcp 192.168.10.0 0.0.0.255 any eq 20</span>
+
+<span class="comment">! ปฏิเสธ P2P Ports</span>
+<span class="command">Router(config-ext-nacl)# 90 deny tcp any any range 6881 6889</span>
+<span class="command">Router(config-ext-nacl)# 100 deny udp any any range 6881 6889</span>
+
+<span class="comment">! อนุญาต ICMP สำหรับ Network Troubleshooting</span>
+<span class="command">Router(config-ext-nacl)# 110 permit icmp any any</span>
+
+<span class="comment">! Deny All ที่เหลือ (Implicit)</span>
+<span class="command">Router(config-ext-nacl)# exit</span>
+
+<span class="comment">! Apply ACL to WAN Interface</span>
+<span class="command">Router(config)# interface serial0/0/0</span>
+<span class="command">Router(config-if)# ip access-group BRANCH_INTERNET out</span>
+                    </div>
+                    
+                    <h3>Scenario 2: DMZ Server Protection</h3>
+                    <p><strong>เงื่อนไข:</strong> ป้องกัน DMZ Servers และควบคุมการเข้าถึง</p>
+                    <ul>
+                        <li>Web Server (10.1.1.10): รับ HTTP/HTTPS จาก Internet</li>
+                        <li>Mail Server (10.1.1.11): รับ SMTP/POP3 จาก Internet</li>
+                        <li>Management จาก Internal Network เท่านั้น</li>
+                        <li>ไม่อนุญาตให้ DMZ เข้าถึง Internal Network</li>
+                    </ul>
+                    
+                    <div class="code-block">
+<span class="comment">! ACL สำหรับ Traffic จาก Internet เข้า DMZ</span>
+<span class="command">Router(config)# ip access-list extended INTERNET_TO_DMZ</span>
+
+<span class="comment">! Web Server Services</span>
+<span class="command">Router(config-ext-nacl)# 10 permit tcp any host 10.1.1.10 eq 80</span>
+<span class="command">Router(config-ext-nacl)# 20 permit tcp any host 10.1.1.10 eq 443</span>
+
+<span class="comment">! Mail Server Services</span>
+<span class="command">Router(config-ext-nacl)# 30 permit tcp any host 10.1.1.11 eq 25</span>
+<span class="command">Router(config-ext-nacl)# 40 permit tcp any host 10.1.1.11 eq 110</span>
+
+<span class="comment">! อนุญาต ICMP Echo Reply (Response to Ping)</span>
+<span class="command">Router(config-ext-nacl)# 50 permit icmp any 10.1.1.0 0.0.0.255 echo-reply</span>
+
+<span class="comment">! Deny All อื่นๆ</span>
+<span class="command">Router(config-ext-nacl)# 60 deny ip any any</span>
+<span class="command">Router(config-ext-nacl)# exit</span>
+
+<span class="comment">! ACL สำหรับ Management จาก Internal Network</span>
+<span class="command">Router(config)# ip access-list extended INTERNAL_TO_DMZ</span>
+
+<span class="comment">! SSH Management เฉพาะจาก Management Subnet</span>
+<span class="command">Router(config-ext-nacl)# 10 permit tcp 192.168.100.0 0.0.0.255 10.1.1.0 0.0.0.255 eq 22</span>
+
+<span class="comment">! SNMP Monitoring</span>
+<span class="command">Router(config-ext-nacl)# 20 permit udp 192.168.100.10 0.0.0.0 10.1.1.0 0.0.0.255 eq 161</span>
+
+<span class="comment">! ICMP สำหรับ Network Monitoring</span>
+<span class="command">Router(config-ext-nacl)# 30 permit icmp 192.168.100.0 0.0.0.255 10.1.1.0 0.0.0.255</span>
+
+<span class="comment">! Deny DMZ Access to Internal Networks</span>
+<span class="command">Router(config-ext-nacl)# 40 deny ip 10.1.1.0 0.0.0.255 192.168.0.0 0.0.255.255</span>
+
+<span class="comment">! อนุญาต DMZ เข้า Internet</span>
+<span class="command">Router(config-ext-nacl)# 50 permit ip 10.1.1.0 0.0.0.255 any</span>
+<span class="command">Router(config-ext-nacl)# exit</span>
+
+<span class="comment">! Apply ACLs</span>
+<span class="command">Router(config)# interface fastethernet0/0</span>
+<span class="command">Router(config-if)# description "Internet Interface"</span>
+<span class="command">Router(config-if)# ip access-group INTERNET_TO_DMZ in</span>
+
+<span class="command">Router(config)# interface fastethernet0/1</span>
+<span class="command">Router(config-if)# description "Internal Network Interface"</span>
+<span class="command">Router(config-if)# ip access-group INTERNAL_TO_DMZ in</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Troubleshooting -->
+            <div class="section">
+                <h2 class="section-title">🔧 การแก้ไขปัญหา ACLs</h2>
+                <div class="subsection">
+                    <h3>คำสั่งสำหรับตรวจสอบ ACLs</h3>
+                    <div class="code-block">
+<span class="comment">! ดู ACL ทั้งหมด</span>
+<span class="command">Router# show ip access-lists</span>
+
+<span class="comment">! ดู ACL เฉพาะ</span>
+<span class="command">Router# show ip access-lists [ACL-name/number]</span>
+
+<span class="comment">! ดูการ Apply ACL บน Interface</span>
+<span class="command">Router# show ip interface [interface-name]</span>
+
+<span class="comment">! ดู Hit Count ของ ACL</span>
+<span class="command">Router# show access-lists</span>
+
+<span class="comment">! Clear Hit Counters</span>
+<span class="command">Router# clear access-list counters [ACL-name/number]</span>
+                    </div>
+                    
+                    <h3>ปัญหาที่พบบ่อยและวิธีแก้ไข</h3>
+                    
+                    <div class="warning-box">
+                        <h4>🚫 ปัญหา: ACL ไม่ทำงาน</h4>
+                        <strong>สาเหตุที่เป็นไปได้:</strong>
+                        <ul>
+                            <li>ลืม Apply ACL บน Interface</li>
+                            <li>Apply ผิดทิศทาง (in/out)</li>
+                            <li>ลำดับ Entry ผิด</li>
+                            <li>Wildcard Mask ผิด</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="info-box">
+                        <h4>✅ วิธีแก้ไข:</h4>
+                        <ol>
+                            <li>ตรวจสอบว่า ACL ถูก Apply บน Interface หรือไม่</li>
+                            <li>ตรวจสอบทิศทางการ Apply (in/out)</li>
+                            <li>ตรวจสอบลำดับ Entry ใน ACL</li>
+                            <li>ใช้ Debug เพื่อติดตาม Packet Flow</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="example-box">
+                        <h4>ตัวอย่างการ Debug ACL</h4>
+                        <div class="code-block">
+<span class="comment">! เปิด Debug ACL</span>
+<span class="command">Router# debug ip access-list [ACL-number]</span>
+
+<span class="comment">! ดู Log Messages</span>
+<span class="command">Router# show logging</span>
+
+<span class="comment">! ปิด Debug</span>
+<span class="command">Router# no debug ip access-list [ACL-number]</span>
+<span class="command">Router# undebug all</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Best Practices -->
+            <div class="section">
+                <h2 class="section-title">🌟 Best Practices สำหรับ ACLs</h2>
+                <div class="subsection">
+                    <h3>หลักการสำคัญ</h3>
+                    <ol>
+                        <li><strong>วางแผนก่อนสร้าง ACL:</strong> วาดแผนภาพ Network และกำหนด Security Policy</li>
+                        <li><strong>ใช้ Named ACLs:</strong> ง่ายต่อการจัดการและเข้าใจ</li>
+                        <li><strong>เรียงลำดับอย่างระมัดระวัง:</strong> Entry เฉพาะเจาะจงก่อน, กว้างๆ ทีหลัง</li>
+                        <li><strong>ใช้ Comments:</strong> อธิบายจุดประสงค์ของแต่ละ Entry</li>
+                        <li><strong>Test อย่างละเอียด:</strong> ทดสอบก่อน Deploy จริง</li>
+                    </ol>
+                    
+                    <h3>การจัดวาง ACL</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ประเภท ACL</th>
+                                    <th>ตำแหน่งที่แนะนำ</th>
+                                    <th>เหตุผล</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Standard ACLs</td>
+                                    <td>ใกล้ Destination</td>
+                                    <td>Filter เฉพาะ Source IP เท่านั้น</td>
+                                </tr>
+                                <tr>
+                                    <td>Extended ACLs</td>
+                                    <td>ใกล้ Source</td>
+                                    <td>Filter ได้หลายเงื่อนไข, ประหยัด Bandwidth</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <h3>Template สำหรับ Security ACL</h3>
+                    <div class="code-block">
+<span class="comment">! Standard Security ACL Template</span>
+<span class="command">ip access-list extended SECURITY_TEMPLATE</span>
+<span class="comment">! 1. อนุญาต Traffic ที่จำเป็น</span>
+<span class="command"> 10 permit tcp any any eq 80</span>
+<span class="command"> 20 permit tcp any any eq 443</span>
+<span class="command"> 30 permit udp any any eq 53</span>
+
+<span class="comment">! 2. ปฏิเสธ Traffic ที่เป็นอันตราย</span>
+<span class="command"> 40 deny tcp any any eq 135</span>
+<span class="command"> 50 deny tcp any any eq 139</span>
+<span class="command"> 60 deny tcp any any eq 445</span>
+
+<span class="comment">! 3. Log Suspicious Activity</span>
+<span class="command"> 70 deny ip any any log</span>
+                    </div>
+                    
+                    <div class="info-box">
+                        <h4>💡 เคล็ดลับสำหรับมือใหม่:</h4>
+                        <ul>
+                            <li>เริ่มจาก ACL ง่ายๆ ก่อน แล้วค่อยซับซ้อนขึ้น</li>
+                            <li>เก็บ Backup Configuration ก่อนแก้ไข ACL</li>
+                            <li>ใช้ Lab Environment สำหรับทดสอบ</li>
+                            <li>ศึกษา Network Traffic Pattern ก่อนสร้าง ACL</li>
+                            <li>Monitor Hit Counters เป็นประจำ</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
