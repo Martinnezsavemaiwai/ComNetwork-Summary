@@ -28,6 +28,7 @@
 | 7️⃣ | **Network Layer: Routing & Algorithms** | [Read Summary](https://martinnezsavemaiwai.github.io/ComNetwork-Summary/lecture7.html) |
 | 8️⃣ | **Transport Layer: Concepts & Protocols** | [Read Summary](https://martinnezsavemaiwai.github.io/ComNetwork-Summary/lecture8.html) |
 | 9️⃣ | **Transport Layer: TCP & Congestion Control** | [Read Summary](https://martinnezsavemaiwai.github.io/ComNetwork-Summary/lecture9.html) |
+| options | **ACLs Summary** | [Read Summary](https://martinnezsavemaiwai.github.io/ComNetwork-Summary/ACLs.html) |
 
 ---
 
